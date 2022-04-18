@@ -20,22 +20,19 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.ar.core.Anchor
-import com.google.ar.core.Plane
-import com.google.ar.core.Pose
-import com.google.ar.core.TrackingState
-import com.google.ar.sceneform.AnchorNode
-import com.google.ar.sceneform.ArSceneView
-import com.google.ar.sceneform.FrameTime
-import com.google.ar.sceneform.Node
+import com.google.ar.core.*
+import com.google.ar.sceneform.*
+import com.google.ar.sceneform.Camera
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
+import kotlin.math.abs
 
 class ARActivity : AppCompatActivity(), SensorEventListener {
     //UI 변수
@@ -49,7 +46,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     lateinit var mAccelerometer: Sensor
     lateinit var mMagnetometer: Sensor
     lateinit var mLocation: Location
-    lateinit var locationManager : LocationManager
+    lateinit var locationManager: LocationManager
     private var azimuthinDegress = 0f  // y축 각도
     private val noAccel = floatArrayOf(0f, 3f, 3f)
     private val mLastMagnetometer = FloatArray(3)
@@ -60,13 +57,14 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
     //AR 변수
     private var checkPointRender: ModelRenderable? = null
-    private var arFragment: ArFragment? = null
-    private var arSceneView: ArSceneView? = null
+    lateinit var arFragment: ArFragment
+    lateinit var arSceneView: ArSceneView
+    lateinit var frame: Frame
+    lateinit var camera: Camera
     private var prevAnchorNode: AnchorNode? = null
     private val node = Node()
     lateinit var targetLocation: Location
     lateinit var lastLocation: Location
-    private var count = 0 // count 변수
     private var angle = 0F // 북위각도
 
     //위도 경도 형식으로 받아오는 배열값
@@ -74,7 +72,12 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
     /**hide this**/
     private val gpsNodePoint = arrayOf(
-        doubleArrayOf(37.64450, 126.69155)
+        doubleArrayOf(37.64450, 126.69155),
+        doubleArrayOf(37.64447, 126.69070),
+        doubleArrayOf(37.64442, 126.68899),
+        doubleArrayOf(37.64452, 126.68715),
+        doubleArrayOf(37.64485, 126.68586),
+        doubleArrayOf(37.64489, 126.68569)
 
     )
 
@@ -133,10 +136,12 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             .getLastKnownLocation(LocationManager.GPS_PROVIDER)!!
 
         checkPermission()
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
             1000,  // interval.
             1f,  // 10 meters
-            locationListener)
+            locationListener
+        )
 
 
         //체크포인트 AR 이미지 초기화
@@ -162,12 +167,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
 
         //AR 화면 실행
-        arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment?
-        arFragment!!.arSceneView.scene.addOnUpdateListener { frameTime: FrameTime ->
-            onUpdate(
-                frameTime
-            )
-        }
+        arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
+        arSceneView = arFragment.arSceneView
+        target()
     }
 
     //가속도, 자기장 센서 값 받아오기
@@ -190,115 +192,121 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
-    private fun onUpdate(frameTime: FrameTime) {
-        val frame = arFragment!!.arSceneView.arFrame
-        arSceneView = arFragment!!.arSceneView
-        val camera = arSceneView!!.getScene().camera
 
-        //target 위치에 모델 세우기
-        targetLocation = getNextLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
-        lastLocation = getNextLocation(
-            gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
-            gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
-        )
+    var currentDistance: Double = 0.0
+    var lastDistance: Double = 0.0
 
-        if (mLocation.latitude > 0) {
-            //target 위치와 현재 위치 간 각도 및 거리 계산
-            angle = gpsToDegree(mLocation, targetLocation).toFloat()
-            val currentDistance = getDistance(
-                mLocation, getNextLocation(
-                    gpsNodePointArrayList[0][0],
-                    gpsNodePointArrayList[0][1]
+    //target 위치에 모델 세우기
+    private fun target() {
+        CoroutineScope(Dispatchers.Main).launch {
+            while (true) {
+                frame = arFragment.arSceneView.arFrame!!
+                camera = arSceneView.scene.camera
+
+                targetLocation =
+                    getNextLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+                lastLocation = getNextLocation(
+                    gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
+                    gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
                 )
-            )
-            val lastDistance = getDistance(mLocation, lastLocation)
-            tv_checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
-            tv_target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
-            tv_now.text =
-                "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
 
-            //체크포인트 표시
-            if (Math.abs(angle - azimuthinDegress) <= 10 && currentDistance <= 5) {
-                node.parent = arSceneView!!.getScene()
-                node.renderable = checkPointRender
-                val ray = camera.screenPointToRay(1000 / 2f, 500f)
-                val newPosition = ray.getPoint((currentDistance / 5).toFloat())
-                node.localPosition = newPosition
-            } else {
-                node.renderable = null
-            }
+                //target 위치와 현재 위치 간 각도 및 거리 계산
+                angle = gpsToDegree(mLocation, targetLocation).toFloat()
+                currentDistance = getDistance(
+                    mLocation, getNextLocation(
+                        gpsNodePointArrayList[0][0],
+                        gpsNodePointArrayList[0][1]
+                    )
+                )
+                lastDistance = getDistance(mLocation, lastLocation)
+                tv_checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
+                tv_target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
+                tv_now.text =
+                    "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
 
-            //일정 거리 이상 가까이 오면 다음 체크포인트로
-            if (currentDistance <= 4) {
-                gpsNodePointArrayList.removeAt(0)
-            }
-            val tmp2 = getDistance(targetLocation, lastLocation)
-            if (tmp2 > lastDistance) {
-                gpsNodePointArrayList.removeAt(0)
-            }
-
-            //남은 체크포인트 중 지나친 체크포인트 체크
-            try {
-                if (gpsNodePointArrayList.size > 0) {
-                    for (i in gpsNodePointArrayList.indices) {
-                        val tmp = getDistance(
-                            mLocation, getNextLocation(
-                                gpsNodePointArrayList[i][0],
-                                gpsNodePointArrayList[i][1]
-                            )
-                        )
-                        //다음 점이 더 가깝고 일정 거리 이하라면
-                        if (currentDistance > tmp) {
-                            for (j in 0..i) {
-                                gpsNodePointArrayList.removeAt(j)
-                            }
-                            break
-                        }
-                    }
+                //체크포인트 표시
+                if (abs(angle - azimuthinDegress) <= 10 && currentDistance <= 5) {
+                    node.parent = arSceneView.scene
+                    node.renderable = checkPointRender
+                    val ray = camera.screenPointToRay(1000 / 2f, 500f)
+                    val newPosition = ray.getPoint((currentDistance / 5).toFloat())
+                    node.localPosition = newPosition
                 } else {
-                    Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
-                    finish()
+                    node.renderable = null
                 }
-            } catch (e: Exception) {
-                finish()
-                Log.e("Error is detected : ", e.message!!)
-                Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-                //Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
-            }
-        }
+
+                //일정 거리 이상 가까이 오면 다음 체크포인트로
+                if (currentDistance <= 4) {
+                    gpsNodePointArrayList.removeAt(0)
+                }
+                val tmp2 = getDistance(targetLocation, lastLocation)
+                if (tmp2 > lastDistance) {
+                    gpsNodePointArrayList.removeAt(0)
+                }
 
 
-        //평면 지속적으로 탐색
-        val planes = frame!!.getUpdatedTrackables(
-            Plane::class.java
-        )
-        var planePose: Pose
-        var tmpPose: Pose
-        try {
-            for (plane: Plane in planes) {
-                if (plane.trackingState == TrackingState.TRACKING) {
-                    if (count-- <= 0) {
-                        //센서를 통해서 평면 위치 계산후 방위각 계산
-                        planePose = plane.centerPose
-                        tmpPose = myPoseToNewPose(planePose)
-
-                        //평면에 내가 바라보는 방향으로 Anchor 생성
-                        val anchor = plane.createAnchor(tmpPose)
-                        if (prevAnchorNode != null) {
-                            prevAnchorNode!!.anchor!!.detach()
+                //남은 체크포인트 중 지나친 체크포인트 체크
+                try {
+                    if (gpsNodePointArrayList.size > 0) {
+                        for (i in gpsNodePointArrayList.indices) {
+                            val tmp = getDistance(
+                                mLocation, getNextLocation(
+                                    gpsNodePointArrayList[i][0],
+                                    gpsNodePointArrayList[i][1]
+                                )
+                            )
+                            //다음 점이 더 가깝고 일정 거리 이하라면
+                            if (currentDistance > tmp) {
+                                for (j in 0..i) {
+                                    gpsNodePointArrayList.removeAt(j)
+                                }
+                                break
+                            }
                         }
-
-                        //AnchorNode에 Model을 만듦
-                        prevAnchorNode = makeArrow(anchor, angle)
-                        count = 50
+                    } else {
+                        //Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
+                } catch (e: Exception) {
+                    finish()
+                    Log.e("Error is detected : ", e.message!!)
+                    //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
                 }
+
+
+                //평면 지속적으로 탐색
+                val planes = frame.getUpdatedTrackables(
+                    Plane::class.java
+                )
+                var planePose: Pose
+                var tmpPose: Pose
+                try {
+                    for (plane: Plane in planes) {
+                        if (plane.trackingState == TrackingState.TRACKING) {
+                            //센서를 통해서 평면 위치 계산후 방위각 계산
+                            planePose = plane.centerPose
+                            tmpPose = myPoseToNewPose(planePose)
+
+                            //평면에 내가 바라보는 방향으로 Anchor 생성
+                            val anchor = plane.createAnchor(tmpPose)
+                            if (prevAnchorNode != null) {
+                                prevAnchorNode!!.anchor!!.detach()
+                            }
+
+                            //AnchorNode에 Model을 만듦
+                            prevAnchorNode = makeArrow(anchor, angle)
+                        }
+                    }
+                } catch (e: Exception) {
+                    //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+                    Log.e("Error is detected : ", e.message!!)
+                }
+                delay(1000)
             }
-        } catch (e: Exception) {
-            Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-            Log.e("Error is detected : ", e.message!!)
         }
     }
+    //끝
 
     //위도 경도에 따른 Location 값으로 변환
     private fun getNextLocation(lat: Double, lng: Double): Location {
@@ -342,11 +350,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     //핸드폰이 지변과 수직일 경우 : y = 10 x = 좌,우 10~-10 z = 뒤집기따라 10 ~ 10
     private fun myPoseToNewPose(planePose: Pose): Pose {
         //안드로이드 화면이 바라보는 방향의 Pose 추출
-        val dPose = arFragment!!.arSceneView.arFrame!!.camera.displayOrientedPose
+        val dPose = arFragment.arSceneView.arFrame!!.camera.displayOrientedPose
         //평면의 Pose와 화면 계산
         val tmpVec = floatArrayOf(dPose.tx(), planePose.ty(), dPose.tz())
-
-        //tv_pose.text =
         return Pose.makeTranslation(tmpVec)
     }
 
@@ -403,7 +409,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         modelRenderable: ModelRenderable,
         angle: Float
     ) {
-        val transformableNode = TransformableNode(arFragment!!.transformationSystem)
+        val transformableNode = TransformableNode(arFragment.transformationSystem)
         val rotateAngle = (-azimuthinDegress + angle) % 360
 
         //tv2.setText(Float.toString(angle)+ " and "+Float.toString(azimuthinDegress)+" and "+Float.toString(rotateAngle));
@@ -412,7 +418,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         transformableNode.parent = anchorNode
         transformableNode.select()
         transformableNode.renderable = modelRenderable
-        arFragment!!.arSceneView.scene.addChild(anchorNode)
+        arFragment.arSceneView.scene.addChild(anchorNode)
     }
 
     override fun onResume() {
