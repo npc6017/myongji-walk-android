@@ -11,6 +11,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -44,9 +45,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     lateinit var tv_now: TextView
 
     //센서 변수
-    private var mSensorManager: SensorManager? = null
-    private var mAccelerometer: Sensor? = null
-    private var mMagnetometer: Sensor? = null
+    lateinit var mSensorManager: SensorManager
+    lateinit var mAccelerometer: Sensor
+    lateinit var mMagnetometer: Sensor
+    lateinit var mLocation: Location
+    lateinit var locationManager : LocationManager
     private var azimuthinDegress = 0f  // y축 각도
     private val noAccel = floatArrayOf(0f, 3f, 3f)
     private val mLastMagnetometer = FloatArray(3)
@@ -61,7 +64,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     private var arSceneView: ArSceneView? = null
     private var prevAnchorNode: AnchorNode? = null
     private val node = Node()
-    private var myLocation = Location("myLoc")
     lateinit var targetLocation: Location
     lateinit var lastLocation: Location
     private var count = 0 // count 변수
@@ -72,42 +74,36 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
     /**hide this**/
     private val gpsNodePoint = arrayOf(
-        doubleArrayOf(37.000000, 126.000000),
+        doubleArrayOf(37.64450, 126.69155)
 
     )
 
     //권한 체크
     private fun checkPermission() {
-        try {
-            //권한 얻기 - GPS
-            if (ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.ACCESS_FINE_LOCATION
-                ) !=
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                ) {
-                    ActivityCompat.requestPermissions(
-                        this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        MY_PERMISSIONS_REQUEST_READ_CONTACTS
-                    )
-                }
+        //권한 얻기 - GPS
+        when {
+            ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_DENIED -> {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    MY_PERMISSIONS_REQUEST_READ_CONTACTS
+                )
             }
-        } catch (e: Exception) {
-            Log.e("PERMISSION DENIED", e.message!!)
         }
     }
 
-    //LocationManager 선언
+    //locationListener 선언
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            myLocation = location
+            mLocation = location
+
+            val longitude = location.longitude
+            val latitude = location.latitude
+
+            Log.d("Location", "Latitude : $latitude, Longitude : $longitude")
         }
 
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
     }
@@ -129,9 +125,19 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
 
         //센서 초기화
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        mAccelerometer = mSensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        mMagnetometer = mSensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        mLocation = locationManager
+            .getLastKnownLocation(LocationManager.GPS_PROVIDER)!!
+
+        checkPermission()
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+            1000,  // interval.
+            1f,  // 10 meters
+            locationListener)
+
 
         //체크포인트 AR 이미지 초기화
         val goal = ModelRenderable.builder()
@@ -153,6 +159,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                 }
                 null
             }
+
 
         //AR 화면 실행
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment?
@@ -188,12 +195,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         arSceneView = arFragment!!.arSceneView
         val camera = arSceneView!!.getScene().camera
 
-        //위치 갱신
-        val lm = getSystemService(LOCATION_SERVICE) as LocationManager
-        checkPermission()
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, locationListener)
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1f, locationListener)
-
         //target 위치에 모델 세우기
         targetLocation = getNextLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
         lastLocation = getNextLocation(
@@ -201,20 +202,20 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
         )
 
-        if(myLocation.latitude > 0) {
+        if (mLocation.latitude > 0) {
             //target 위치와 현재 위치 간 각도 및 거리 계산
-            angle = gpsToDegree(myLocation, targetLocation).toFloat()
+            angle = gpsToDegree(mLocation, targetLocation).toFloat()
             val currentDistance = getDistance(
-                myLocation, getNextLocation(
+                mLocation, getNextLocation(
                     gpsNodePointArrayList[0][0],
                     gpsNodePointArrayList[0][1]
                 )
             )
-            val lastDistance = getDistance(myLocation, lastLocation)
-            tv_checkPoint!!.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
-            tv_target!!.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
-            tv_now!!.text =
-                "현재좌표 : " + (myLocation.latitude.toString() + "," + myLocation.longitude.toString())
+            val lastDistance = getDistance(mLocation, lastLocation)
+            tv_checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
+            tv_target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
+            tv_now.text =
+                "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
 
             //체크포인트 표시
             if (Math.abs(angle - azimuthinDegress) <= 10 && currentDistance <= 5) {
@@ -241,7 +242,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                 if (gpsNodePointArrayList.size > 0) {
                     for (i in gpsNodePointArrayList.indices) {
                         val tmp = getDistance(
-                            myLocation, getNextLocation(
+                            mLocation, getNextLocation(
                                 gpsNodePointArrayList[i][0],
                                 gpsNodePointArrayList[i][1]
                             )
@@ -297,11 +298,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
             Log.e("Error is detected : ", e.message!!)
         }
-    }
-
-    //돌아가기 버튼
-    fun onClick2(view: View?) {
-        finish()
     }
 
     //위도 경도에 따른 Location 값으로 변환
@@ -421,14 +417,15 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        mSensorManager!!.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME)
-        mSensorManager!!.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME)
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME)
+        mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME)
     }
 
     override fun onPause() {
         super.onPause()
-        mSensorManager!!.unregisterListener(this, mAccelerometer)
-        mSensorManager!!.unregisterListener(this, mMagnetometer)
+        locationManager.removeUpdates(locationListener)
+        mSensorManager.unregisterListener(this, mAccelerometer)
+        mSensorManager.unregisterListener(this, mMagnetometer)
     }
 
     companion object {

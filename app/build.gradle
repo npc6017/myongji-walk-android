@@ -33,7 +33,13 @@ android {
 
 dependencies {
 
+    //AR sceneform
     implementation "com.gorisse.thomas.sceneform:sceneform:1.20.5"
+
+    // google map api & location
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
 
     implementation 'androidx.core:core-ktx:1.7.0'

@@ -3,13 +3,15 @@
     package="com.example.myoungji_walk_android">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+
     <uses-feature
         android:name="android.hardware.camera.ar"
         android:required="true" />
-
-    <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission-sdk-23 android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -32,6 +34,11 @@
         <meta-data
             android:name="com.google.ar.core"
             android:value="required" />
+
+        <service
+            android:name=".ARActivity"
+            android:foregroundServiceType="location" />
+
     </application>
 
 </manifest>
