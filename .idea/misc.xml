@@ -3,11 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/btn_ripple_effect_light_blue.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_arrow_back_ios_new_24.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_blue.xml" value="0.14" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_confirmplace.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_main.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_mainroutesearch.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/fragment_map.xml" value="0.1484375" />

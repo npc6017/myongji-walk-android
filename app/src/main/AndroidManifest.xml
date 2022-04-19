@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.myoungji_walk_android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -28,6 +30,15 @@
         <activity
             android:name=".MainRouteSearchActivity"
             android:noHistory="true"/>
+        <activity
+            android:name=".ConfirmPlaceActivity"
+            android:noHistory="true" />
+        <activity
+            android:name=".NavigationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".OptionSettingActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

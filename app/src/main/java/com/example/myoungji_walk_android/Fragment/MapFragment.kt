@@ -37,4 +37,39 @@ class MapFragment : Fragment() {
             startActivity(intent)
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        binding.mapView.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        binding.mapView.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mapView.onResume()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.mapView.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        binding.mapView.onLowMemory()
+    }
 }

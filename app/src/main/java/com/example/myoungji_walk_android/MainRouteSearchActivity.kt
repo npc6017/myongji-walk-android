@@ -52,7 +52,7 @@ class MainRouteSearchActivity : AppCompatActivity() {
 
     private fun initOptionSettingButton(){
         binding.optionSettingButton.setOnClickListener {
-            //startActivity(Intent(this, OptionSettingActivity::class.java))
+            startActivity(Intent(this, OptionSettingActivity::class.java))
         }
     }
 
