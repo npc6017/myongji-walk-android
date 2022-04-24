@@ -59,8 +59,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     private var checkPointRender: ModelRenderable? = null
     lateinit var arFragment: ArFragment
     lateinit var arSceneView: ArSceneView
-    lateinit var frame: Frame
-    lateinit var camera: Camera
+    private lateinit var frame: Frame
+    private lateinit var camera: Camera
     private var prevAnchorNode: AnchorNode? = null
     private val node = Node()
     lateinit var targetLocation: Location
@@ -124,7 +124,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
         //tast checkpoint. 추후 서버에서 받아올 수 있도록
         tv_ARMode.text = "AR Debug Mode"
-        gpsNodePointArrayList.addAll(Arrays.asList(*gpsNodePoint))
+        gpsNodePointArrayList.addAll(listOf(*gpsNodePoint))
 
 
         //센서 초기화
@@ -169,7 +169,26 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         //AR 화면 실행
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
         arSceneView = arFragment.arSceneView
-        target()
+
+        //frame = arFragment.arSceneView.arFrame
+        camera = arSceneView.scene.camera
+
+        GlobalScope.launch {
+            while (true) {
+                distanceCal()
+                checkPointCal()
+            delay(1000)
+            }
+
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            while (true) {
+                //checkPoint()
+                findAncher()
+                delay(10)
+            }
+        }
     }
 
     //가속도, 자기장 센서 값 받아오기
@@ -197,114 +216,112 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     var lastDistance: Double = 0.0
 
     //target 위치에 모델 세우기
-    private fun target() {
-        CoroutineScope(Dispatchers.Main).launch {
-            while (true) {
-                frame = arFragment.arSceneView.arFrame!!
-                camera = arSceneView.scene.camera
+    private fun distanceCal() {
+        targetLocation =
+            getNextLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+        lastLocation = getNextLocation(
+            gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
+            gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
+        )
 
-                targetLocation =
-                    getNextLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
-                lastLocation = getNextLocation(
-                    gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
-                    gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
-                )
+        //target 위치와 현재 위치 간 각도 및 거리 계산
+        angle = gpsToDegree(mLocation, targetLocation).toFloat()
+        currentDistance = getDistance(
+            mLocation, getNextLocation(
+                gpsNodePointArrayList[0][0],
+                gpsNodePointArrayList[0][1]
+            )
+        )
+        lastDistance = getDistance(mLocation, lastLocation)
+        tv_checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
+        tv_target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
+        tv_now.text =
+            "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
+    }
 
-                //target 위치와 현재 위치 간 각도 및 거리 계산
-                angle = gpsToDegree(mLocation, targetLocation).toFloat()
-                currentDistance = getDistance(
-                    mLocation, getNextLocation(
-                        gpsNodePointArrayList[0][0],
-                        gpsNodePointArrayList[0][1]
-                    )
-                )
-                lastDistance = getDistance(mLocation, lastLocation)
-                tv_checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
-                tv_target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
-                tv_now.text =
-                    "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
-
-                //체크포인트 표시
-                if (abs(angle - azimuthinDegress) <= 10 && currentDistance <= 5) {
-                    node.parent = arSceneView.scene
-                    node.renderable = checkPointRender
-                    val ray = camera.screenPointToRay(1000 / 2f, 500f)
-                    val newPosition = ray.getPoint((currentDistance / 5).toFloat())
-                    node.localPosition = newPosition
-                } else {
-                    node.renderable = null
-                }
-
-                //일정 거리 이상 가까이 오면 다음 체크포인트로
-                if (currentDistance <= 4) {
-                    gpsNodePointArrayList.removeAt(0)
-                }
-                val tmp2 = getDistance(targetLocation, lastLocation)
-                if (tmp2 > lastDistance) {
-                    gpsNodePointArrayList.removeAt(0)
-                }
-
-
-                //남은 체크포인트 중 지나친 체크포인트 체크
-                try {
-                    if (gpsNodePointArrayList.size > 0) {
-                        for (i in gpsNodePointArrayList.indices) {
-                            val tmp = getDistance(
-                                mLocation, getNextLocation(
-                                    gpsNodePointArrayList[i][0],
-                                    gpsNodePointArrayList[i][1]
-                                )
-                            )
-                            //다음 점이 더 가깝고 일정 거리 이하라면
-                            if (currentDistance > tmp) {
-                                for (j in 0..i) {
-                                    gpsNodePointArrayList.removeAt(j)
-                                }
-                                break
-                            }
-                        }
-                    } else {
-                        //Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                } catch (e: Exception) {
-                    finish()
-                    Log.e("Error is detected : ", e.message!!)
-                    //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-                    //Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
-                }
-
-
-                //평면 지속적으로 탐색
-                val planes = frame.getUpdatedTrackables(
-                    Plane::class.java
-                )
-                var planePose: Pose
-                var tmpPose: Pose
-                try {
-                    for (plane: Plane in planes) {
-                        if (plane.trackingState == TrackingState.TRACKING) {
-                            //센서를 통해서 평면 위치 계산후 방위각 계산
-                            planePose = plane.centerPose
-                            tmpPose = myPoseToNewPose(planePose)
-
-                            //평면에 내가 바라보는 방향으로 Anchor 생성
-                            val anchor = plane.createAnchor(tmpPose)
-                            if (prevAnchorNode != null) {
-                                prevAnchorNode!!.anchor!!.detach()
-                            }
-
-                            //AnchorNode에 Model을 만듦
-                            prevAnchorNode = makeArrow(anchor, angle)
-                        }
-                    }
-                } catch (e: Exception) {
-                    //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-                    Log.e("Error is detected : ", e.message!!)
-                }
-                delay(1000)
-            }
+    private fun checkPoint() {
+        //체크포인트 표시
+        if (abs(angle - azimuthinDegress) <= 10 && currentDistance <= 5) {
+            node.parent = arSceneView.scene
+            node.renderable = checkPointRender
+            val ray = camera.screenPointToRay(1000 / 2f, 500f)
+            val newPosition = ray.getPoint((currentDistance / 5).toFloat())
+            node.localPosition = newPosition
+        } else {
+            node.renderable = null
         }
+    }
+
+    private fun checkPointCal() {
+        //일정 거리 이상 가까이 오면 다음 체크포인트로
+        if (currentDistance <= 4) {
+            gpsNodePointArrayList.removeAt(0)
+        }
+        val tmp2 = getDistance(targetLocation, lastLocation)
+        if (tmp2 > lastDistance) {
+            gpsNodePointArrayList.removeAt(0)
+        }
+
+
+        //남은 체크포인트 중 지나친 체크포인트 체크
+        try {
+            if (gpsNodePointArrayList.size > 0) {
+                for (i in gpsNodePointArrayList.indices) {
+                    val tmp = getDistance(
+                        mLocation, getNextLocation(
+                            gpsNodePointArrayList[i][0],
+                            gpsNodePointArrayList[i][1]
+                        )
+                    )
+                    //다음 점이 더 가깝고 일정 거리 이하라면
+                    if (currentDistance > tmp) {
+                        for (j in 0..i) {
+                            gpsNodePointArrayList.removeAt(j)
+                        }
+                        break
+                    }
+                }
+            } else {
+                //Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        } catch (e: Exception) {
+            finish()
+            Log.e("Error is detected : ", e.message!!)
+            //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun findAncher(){
+        //평면 지속적으로 탐색
+        val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
+            Plane::class.java
+        )
+        var planePose: Pose
+        var tmpPose: Pose
+        try {
+            for (plane: Plane in planes) {
+                if (plane.trackingState == TrackingState.TRACKING) {
+                    //센서를 통해서 평면 위치 계산후 방위각 계산
+                    planePose = plane.centerPose
+                    tmpPose = myPoseToNewPose(planePose)
+
+                    //평면에 내가 바라보는 방향으로 Anchor 생성
+                    val anchor = plane.createAnchor(tmpPose)
+                    if (prevAnchorNode != null) {
+                        prevAnchorNode!!.anchor!!.detach()
+                    }
+
+                    //AnchorNode에 Model을 만듦
+                    prevAnchorNode = makeArrow(anchor, angle)
+                }
+            }
+        } catch (e: Exception) {
+            //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+            Log.e("Error is detected : ", e.message!!)
+        }
+
     }
     //끝
 
