@@ -11,25 +11,24 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.ar.core.*
-import com.google.ar.sceneform.*
+import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Camera
+import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.coroutines.*
-import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import kotlin.math.abs
@@ -165,10 +164,16 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                 null
             }
 
-
         //AR 화면 실행
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
         arSceneView = arFragment.arSceneView
+
+
+        //ar 조명효과 비활성화
+        val session = Session(this)
+        val config = session.config
+        config.lightEstimationMode = Config.LightEstimationMode.DISABLED
+        session.configure(config)
 
         //frame = arFragment.arSceneView.arFrame
         camera = arSceneView.scene.camera
@@ -186,7 +191,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             while (true) {
                 //checkPoint()
                 findAncher()
-                delay(10)
+                delay(50)
             }
         }
     }

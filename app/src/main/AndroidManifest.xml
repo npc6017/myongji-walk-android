@@ -29,7 +29,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ARActivity" />
+        <activity
+            android:name=".ARActivity" />
 
         <meta-data
             android:name="com.google.ar.core"
