@@ -19,10 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.ar.core.*
-import com.google.ar.sceneform.AnchorNode
-import com.google.ar.sceneform.ArSceneView
+import com.google.ar.sceneform.*
 import com.google.ar.sceneform.Camera
-import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -175,25 +173,22 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         config.lightEstimationMode = Config.LightEstimationMode.DISABLED
         session.configure(config)
 
-        //frame = arFragment.arSceneView.arFrame
         camera = arSceneView.scene.camera
 
-        GlobalScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 distanceCal()
                 checkPointCal()
-            delay(1000)
+                delay(1000)
             }
 
         }
 
-        CoroutineScope(Dispatchers.Main).launch {
-            while (true) {
-                //checkPoint()
-                findAncher()
-                delay(50)
-            }
+        arFragment.arSceneView.scene.addOnUpdateListener {
+            findAncher(
+            )
         }
+
     }
 
     //가속도, 자기장 센서 값 받아오기
@@ -298,35 +293,36 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun findAncher(){
-        //평면 지속적으로 탐색
-        val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
-            Plane::class.java
-        )
-        var planePose: Pose
-        var tmpPose: Pose
-        try {
-            for (plane: Plane in planes) {
-                if (plane.trackingState == TrackingState.TRACKING) {
-                    //센서를 통해서 평면 위치 계산후 방위각 계산
-                    planePose = plane.centerPose
-                    tmpPose = myPoseToNewPose(planePose)
+    private fun findAncher() {
+        CoroutineScope(Dispatchers.Main).launch {
+            //평면 지속적으로 탐색
+            val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
+                Plane::class.java
+            )
+            var planePose: Pose
+            var tmpPose: Pose
+            try {
+                for (plane: Plane in planes) {
+                    if (plane.trackingState == TrackingState.TRACKING) {
+                        //센서를 통해서 평면 위치 계산후 방위각 계산
+                        planePose = plane.centerPose
+                        tmpPose = myPoseToNewPose(planePose)
 
-                    //평면에 내가 바라보는 방향으로 Anchor 생성
-                    val anchor = plane.createAnchor(tmpPose)
-                    if (prevAnchorNode != null) {
-                        prevAnchorNode!!.anchor!!.detach()
+                        //평면에 내가 바라보는 방향으로 Anchor 생성
+                        val anchor = plane.createAnchor(tmpPose)
+                        if (prevAnchorNode != null) {
+                            prevAnchorNode!!.anchor!!.detach()
+                        }
+
+                        //AnchorNode에 Model을 만듦
+                        prevAnchorNode = makeArrow(anchor, angle)
                     }
-
-                    //AnchorNode에 Model을 만듦
-                    prevAnchorNode = makeArrow(anchor, angle)
                 }
+            } catch (e: Exception) {
+                //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+                Log.e("Error is detected : ", e.message!!)
             }
-        } catch (e: Exception) {
-            //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-            Log.e("Error is detected : ", e.message!!)
         }
-
     }
     //끝
 
@@ -431,16 +427,18 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         modelRenderable: ModelRenderable,
         angle: Float
     ) {
-        val transformableNode = TransformableNode(arFragment.transformationSystem)
-        val rotateAngle = (-azimuthinDegress + angle) % 360
+        CoroutineScope(Dispatchers.Main).launch {
+            val transformableNode = TransformableNode(arFragment.transformationSystem)
+            val rotateAngle = (-azimuthinDegress + angle) % 360
 
-        //tv2.setText(Float.toString(angle)+ " and "+Float.toString(azimuthinDegress)+" and "+Float.toString(rotateAngle));
-        val quaternion1 = Quaternion.axisAngle(Vector3(0F, -1F, 0F), rotateAngle)
-        transformableNode.worldRotation = quaternion1
-        transformableNode.parent = anchorNode
-        transformableNode.select()
-        transformableNode.renderable = modelRenderable
-        arFragment.arSceneView.scene.addChild(anchorNode)
+            //tv2.setText(Float.toString(angle)+ " and "+Float.toString(azimuthinDegress)+" and "+Float.toString(rotateAngle));
+            val quaternion1 = Quaternion.axisAngle(Vector3(0F, -1F, 0F), rotateAngle)
+            transformableNode.worldRotation = quaternion1
+            transformableNode.parent = anchorNode
+            transformableNode.select()
+            transformableNode.renderable = modelRenderable
+            arFragment.arSceneView.scene.addChild(anchorNode)
+        }
     }
 
     override fun onResume() {
