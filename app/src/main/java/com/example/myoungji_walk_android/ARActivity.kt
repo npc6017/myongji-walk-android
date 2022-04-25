@@ -1,6 +1,7 @@
 package com.example.myoungji_walk_android
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -19,10 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.ar.core.*
-import com.google.ar.sceneform.AnchorNode
-import com.google.ar.sceneform.ArSceneView
+import com.google.ar.sceneform.*
 import com.google.ar.sceneform.Camera
-import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -58,7 +57,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     private var checkPointRender: ModelRenderable? = null
     lateinit var arFragment: ArFragment
     lateinit var arSceneView: ArSceneView
-    private lateinit var frame: Frame
     private lateinit var camera: Camera
     private var prevAnchorNode: AnchorNode? = null
     private val node = Node()
@@ -175,25 +173,21 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         config.lightEstimationMode = Config.LightEstimationMode.DISABLED
         session.configure(config)
 
-        //frame = arFragment.arSceneView.arFrame
         camera = arSceneView.scene.camera
 
-        GlobalScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 distanceCal()
                 checkPointCal()
-            delay(1000)
+                delay(1000)
             }
 
         }
 
-        CoroutineScope(Dispatchers.Main).launch {
-            while (true) {
-                //checkPoint()
-                findAncher()
-                delay(50)
-            }
+        arFragment.arSceneView.scene.addOnUpdateListener {
+            findAncher()
         }
+
     }
 
     //가속도, 자기장 센서 값 받아오기
@@ -298,35 +292,37 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun findAncher(){
-        //평면 지속적으로 탐색
-        val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
-            Plane::class.java
-        )
-        var planePose: Pose
-        var tmpPose: Pose
-        try {
-            for (plane: Plane in planes) {
-                if (plane.trackingState == TrackingState.TRACKING) {
-                    //센서를 통해서 평면 위치 계산후 방위각 계산
-                    planePose = plane.centerPose
-                    tmpPose = myPoseToNewPose(planePose)
+    private fun findAncher() {
+        CoroutineScope(Dispatchers.Main).launch {
+            //평면 지속적으로 탐색
+            val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
+                Plane::class.java
+            )
+            var planePose: Pose
+            var tmpPose: Pose
+            try {
+                for (plane: Plane in planes) {
+                    if (plane.trackingState == TrackingState.TRACKING) {
+                        //센서를 통해서 평면 위치 계산후 방위각 계산
+                        planePose = plane.centerPose
+                        //내 위치를 화살표가 잘보이는 위치로 변경
+                        //핸드폰이 지변과 수직일 경우 : y = 10 x = 좌,우 10~-10 z = 뒤집기따라 10 ~ 10
+                        val dPose = arFragment.arSceneView.arFrame!!.camera.displayOrientedPose
+                        //평면의 Pose와 화면 계산
+                        val tmpVec = floatArrayOf(dPose.tx(), planePose.ty(), dPose.tz())
+                        tmpPose = Pose.makeTranslation(tmpVec)
 
-                    //평면에 내가 바라보는 방향으로 Anchor 생성
-                    val anchor = plane.createAnchor(tmpPose)
-                    if (prevAnchorNode != null) {
-                        prevAnchorNode!!.anchor!!.detach()
+                        //평면에 내가 바라보는 방향으로 Anchor 생성
+                        val anchor = plane.createAnchor(tmpPose)
+                        makeArrow(anchor, angle)
                     }
-
-                    //AnchorNode에 Model을 만듦
-                    prevAnchorNode = makeArrow(anchor, angle)
                 }
+            } catch (e: Exception) {
+                //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+                Log.e("Error is detected : ", e.message!!)
             }
-        } catch (e: Exception) {
-            //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-            Log.e("Error is detected : ", e.message!!)
+            delay(300)
         }
-
     }
     //끝
 
@@ -368,16 +364,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         return true_bearing
     }
 
-    //내 위치를 화살표가 잘보이는 위치로 변경
-    //핸드폰이 지변과 수직일 경우 : y = 10 x = 좌,우 10~-10 z = 뒤집기따라 10 ~ 10
-    private fun myPoseToNewPose(planePose: Pose): Pose {
-        //안드로이드 화면이 바라보는 방향의 Pose 추출
-        val dPose = arFragment.arSceneView.arFrame!!.camera.displayOrientedPose
-        //평면의 Pose와 화면 계산
-        val tmpVec = floatArrayOf(dPose.tx(), planePose.ty(), dPose.tz())
-        return Pose.makeTranslation(tmpVec)
-    }
-
     //두 위도 경도 주어지면 거리로 변환
     private fun getDistance(myLocation: Location?, targetLocation: Location?): Double {
         //위도 추출
@@ -399,10 +385,14 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     }
 
     //이미지 만들기 - 방향 표시 화살표
-    private fun makeArrow(anchor: Anchor, angle: Float): AnchorNode {
+    private fun makeArrow(anchor: Anchor, angle: Float) {
+        if (prevAnchorNode != null) {
+            prevAnchorNode!!.anchor!!.detach()
+        }
         val anchorNode = AnchorNode(anchor)
+        prevAnchorNode = anchorNode
         ModelRenderable.builder()
-            .setSource(this, Uri.parse("arrow.glb"))
+            .setSource(this@ARActivity, Uri.parse("arrow.glb"))
             .setIsFilamentGltf(true)
             .setAsyncLoadEnabled(true)
             .build()
@@ -416,12 +406,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             }
             .exceptionally { throwable: Throwable ->
                 val builder: AlertDialog.Builder =
-                    AlertDialog.Builder(this)
+                    AlertDialog.Builder(this@ARActivity)
                 builder.setMessage(throwable.message)
                     .show()
                 null
             }
-        return anchorNode
     }
 
     //찾은 앵커에 3D 모델을 만듦
