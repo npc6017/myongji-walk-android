@@ -27,13 +27,20 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.MapFragment
+import com.naver.maps.map.NaverMap
+import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
+import com.naver.maps.map.overlay.PathOverlay
 import kotlinx.coroutines.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import kotlin.math.abs
 
 
-class ARActivity : AppCompatActivity(), SensorEventListener {
+class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback {
 
     //센서 변수
     lateinit var mSensorManager: SensorManager
@@ -177,6 +184,14 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
         }
 
+        val fm = supportFragmentManager
+        val mapFragment = fm.findFragmentById(R.id.map_fragment) as MapFragment?
+            ?: MapFragment.newInstance().also {
+                fm.beginTransaction().add(R.id.map_fragment, it).commit()
+            }
+
+        mapFragment.getMapAsync(this)
+
         arFragment.arSceneView.scene.addOnUpdateListener {
             checkPoint()
             findAncher()
@@ -211,8 +226,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     //target 위치에 모델 세우기
     private fun distanceCal() {
         targetLocation =
-            locationModel.coorToLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
-        lastLocation = locationModel.coorToLocation(
+            locationModel.coordToLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+        lastLocation = locationModel.coordToLocation(
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
         )
@@ -220,7 +235,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         //target 위치와 현재 위치 간 각도 및 거리 계산
         angle = locationModel.gpsToDegree(mLocation, targetLocation).toFloat()
         currentDistance = locationModel.getDistance(
-            mLocation, locationModel.coorToLocation(
+            mLocation, locationModel.coordToLocation(
                 gpsNodePointArrayList[0][0],
                 gpsNodePointArrayList[0][1]
             )
@@ -261,7 +276,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             if (gpsNodePointArrayList.size > 0) {
                 for (i in gpsNodePointArrayList.indices) {
                     val tmp = locationModel.getDistance(
-                        mLocation, locationModel.coorToLocation(
+                        mLocation, locationModel.coordToLocation(
                             gpsNodePointArrayList[i][0],
                             gpsNodePointArrayList[i][1]
                         )
@@ -310,7 +325,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                         //평면에 내가 바라보는 방향으로 Anchor 생성
                         val anchor = plane.createAnchor(tmpPose)
                         makeArrow(anchor, angle)
-                            count = 50
+                            count = 30
                         }
                     }
                 }
@@ -386,4 +401,23 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         //GPS 변수
         private val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10
     }
+
+    override fun onMapReady(naverMap: NaverMap) {
+        val marker = Marker()
+        marker.position = LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+        marker.map = naverMap
+
+        val path = PathOverlay()
+        path.coords = listOf(
+            LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1]),
+            LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1]),
+            LatLng(gpsNodePointArrayList[2][0], gpsNodePointArrayList[2][1]),
+            LatLng(gpsNodePointArrayList[3][0], gpsNodePointArrayList[3][1])
+        )
+        path.map = naverMap
+    }
 }
+
+
+
+

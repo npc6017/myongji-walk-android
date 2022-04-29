@@ -8,7 +8,7 @@ import kotlin.math.sin
 class LocationModel {
 
     //위도 경도에 따른 Location 값으로 변환
-    fun coorToLocation(lat: Double, lng: Double): Location {
+    fun coordToLocation(lat: Double, lng: Double): Location {
         val location = Location("nextLoc")
         location.latitude = lat
         location.longitude = lng
