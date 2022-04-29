@@ -12,7 +12,6 @@ import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +31,7 @@ import kotlinx.coroutines.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import kotlin.math.abs
+
 
 class ARActivity : AppCompatActivity(), SensorEventListener {
 
@@ -62,6 +62,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
     private var count = 0 // count 변수
     private lateinit var binding: FragmentArBinding
+    private lateinit var locationModel: LocationModel
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
@@ -110,7 +111,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.fragment_ar)
-
+        locationModel = LocationModel()
         //tast checkpoint. 추후 서버에서 받아올 수 있도록
         gpsNodePointArrayList.addAll(listOf(*gpsNodePoint))
 
@@ -152,6 +153,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                 }
                 null
             }
+
 
         //AR 화면 실행
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
@@ -209,21 +211,21 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     //target 위치에 모델 세우기
     private fun distanceCal() {
         targetLocation =
-            getNextLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
-        lastLocation = getNextLocation(
+            locationModel.coorToLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+        lastLocation = locationModel.coorToLocation(
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
         )
 
         //target 위치와 현재 위치 간 각도 및 거리 계산
-        angle = gpsToDegree(mLocation, targetLocation).toFloat()
-        currentDistance = getDistance(
-            mLocation, getNextLocation(
+        angle = locationModel.gpsToDegree(mLocation, targetLocation).toFloat()
+        currentDistance = locationModel.getDistance(
+            mLocation, locationModel.coorToLocation(
                 gpsNodePointArrayList[0][0],
                 gpsNodePointArrayList[0][1]
             )
         )
-        lastDistance = getDistance(mLocation, lastLocation)
+        lastDistance = locationModel.getDistance(mLocation, lastLocation)
         binding.checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
         binding.target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
         binding.now.text =
@@ -248,7 +250,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         if (currentDistance <= 4) {
             gpsNodePointArrayList.removeAt(0)
         }
-        val tmp2 = getDistance(targetLocation, lastLocation)
+        val tmp2 = locationModel.getDistance(targetLocation, lastLocation)
         if (tmp2 > lastDistance) {
             gpsNodePointArrayList.removeAt(0)
         }
@@ -258,8 +260,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         try {
             if (gpsNodePointArrayList.size > 0) {
                 for (i in gpsNodePointArrayList.indices) {
-                    val tmp = getDistance(
-                        mLocation, getNextLocation(
+                    val tmp = locationModel.getDistance(
+                        mLocation, locationModel.coorToLocation(
                             gpsNodePointArrayList[i][0],
                             gpsNodePointArrayList[i][1]
                         )
@@ -319,64 +321,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         }
     }
     //끝
-
-    //위도 경도에 따른 Location 값으로 변환
-    private fun getNextLocation(lat: Double, lng: Double): Location {
-        val location = Location("nextLoc")
-        location.latitude = lat
-        location.longitude = lng
-        return location
-    }
-
-    //내 위치에서 원하는 위치로 갈 때 회전각 계산
-    private fun gpsToDegree(myLocation: Location, targetLocation: Location?): Double {
-
-        //내 위치 위도 경도를 라디안으로 변환
-        val myLat = myLocation.latitude * (3.141592 / 180)
-        val myLng = myLocation.longitude * (3.141592 / 180)
-
-        //타겟 위치 위도 경도를 라디안으로 변환
-        val targetLat = targetLocation!!.latitude * (3.141592 / 180)
-        val targetLng = targetLocation.longitude * (3.141592 / 180)
-
-        //라디안 거리 계산
-        val radianDistance = Math.acos(
-            Math.sin(myLat) * Math.sin(targetLat)
-                    + Math.cos(myLat) * Math.cos(targetLat) * Math.cos(myLng - targetLng)
-        )
-
-        //라디안 거리 => 라디안 각 => 각도 변환
-        val radian_bearing = Math.acos(
-            (Math.sin(targetLat) - Math.sin(myLat) * Math.cos(radianDistance)) / (0.00001 + (Math.cos(
-                myLat
-            ) * Math.sin(radianDistance)))
-        )
-        var true_bearing = radian_bearing * (180 / 3.141592)
-        if (Math.sin(targetLng - myLng) < 0) {
-            true_bearing = 360 - true_bearing
-        }
-        return true_bearing
-    }
-
-    //두 위도 경도 주어지면 거리로 변환
-    private fun getDistance(myLocation: Location?, targetLocation: Location?): Double {
-        //위도 추출
-        val lat1 = myLocation!!.latitude
-        val lat2 = targetLocation!!.latitude
-
-        //경도 추출
-        val lng1 = myLocation.longitude
-        val lng2 = targetLocation.longitude
-        val distance: Double
-        val locationA = Location("point A")
-        locationA.latitude = lat1
-        locationA.longitude = lng1
-        val locationB = Location("point B")
-        locationB.latitude = lat2
-        locationB.longitude = lng2
-        distance = locationA.distanceTo(locationB).toDouble()
-        return distance
-    }
 
     //이미지 만들기 - 방향 표시 화살표
     private fun makeArrow(anchor: Anchor, angle: Float) {
