@@ -1,7 +1,6 @@
 package com.example.myoungji_walk_android
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -13,12 +12,14 @@ import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import com.example.myoungji_walk_android.databinding.FragmentArBinding
 import com.google.ar.core.*
 import com.google.ar.sceneform.*
 import com.google.ar.sceneform.Camera
@@ -33,11 +34,6 @@ import java.util.concurrent.ExecutionException
 import kotlin.math.abs
 
 class ARActivity : AppCompatActivity(), SensorEventListener {
-    //UI 변수
-    lateinit var tv_ARMode: TextView
-    lateinit var tv_checkPoint: TextView
-    lateinit var tv_target: TextView
-    lateinit var tv_now: TextView
 
     //센서 변수
     lateinit var mSensorManager: SensorManager
@@ -63,6 +59,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
     lateinit var targetLocation: Location
     lateinit var lastLocation: Location
     private var angle = 0F // 북위각도
+
+    private var count = 0 // count 변수
+    private lateinit var binding: FragmentArBinding
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
@@ -110,17 +109,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_ar)
-
-        //텍스트뷰 초기화
-        tv_ARMode = findViewById<View>(R.id.AR_mode) as TextView
-        tv_checkPoint = findViewById<View>(R.id.checkPoint) as TextView
-        tv_target = findViewById<View>(R.id.target) as TextView
-        tv_now = findViewById<View>(R.id.now) as TextView
-
+        binding = DataBindingUtil.setContentView(this, R.layout.fragment_ar)
 
         //tast checkpoint. 추후 서버에서 받아올 수 있도록
-        tv_ARMode.text = "AR Debug Mode"
         gpsNodePointArrayList.addAll(listOf(*gpsNodePoint))
 
 
@@ -185,6 +176,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         }
 
         arFragment.arSceneView.scene.addOnUpdateListener {
+            checkPoint()
             findAncher()
         }
 
@@ -232,9 +224,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             )
         )
         lastDistance = getDistance(mLocation, lastLocation)
-        tv_checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
-        tv_target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
-        tv_now.text =
+        binding.checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
+        binding.target.text = "남은 거리 : " + (Math.round(lastDistance * 100) / 100.0) + " m"
+        binding.now.text =
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
     }
 
@@ -281,14 +273,14 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                     }
                 }
             } else {
-                //Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         } catch (e: Exception) {
             finish()
             Log.e("Error is detected : ", e.message!!)
-            //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-            //Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -303,6 +295,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
             try {
                 for (plane: Plane in planes) {
                     if (plane.trackingState == TrackingState.TRACKING) {
+                        if (count-- <= 0) {
                         //센서를 통해서 평면 위치 계산후 방위각 계산
                         planePose = plane.centerPose
                         //내 위치를 화살표가 잘보이는 위치로 변경
@@ -315,13 +308,14 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
                         //평면에 내가 바라보는 방향으로 Anchor 생성
                         val anchor = plane.createAnchor(tmpPose)
                         makeArrow(anchor, angle)
+                            count = 50
+                        }
                     }
                 }
             } catch (e: Exception) {
                 //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
                 Log.e("Error is detected : ", e.message!!)
             }
-            delay(300)
         }
     }
     //끝
@@ -346,16 +340,16 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         val targetLng = targetLocation.longitude * (3.141592 / 180)
 
         //라디안 거리 계산
-        val radian_distance = Math.acos(
+        val radianDistance = Math.acos(
             Math.sin(myLat) * Math.sin(targetLat)
                     + Math.cos(myLat) * Math.cos(targetLat) * Math.cos(myLng - targetLng)
         )
 
         //라디안 거리 => 라디안 각 => 각도 변환
         val radian_bearing = Math.acos(
-            (Math.sin(targetLat) - Math.sin(myLat) * Math.cos(radian_distance)) / (0.00001 + (Math.cos(
+            (Math.sin(targetLat) - Math.sin(myLat) * Math.cos(radianDistance)) / (0.00001 + (Math.cos(
                 myLat
-            ) * Math.sin(radian_distance)))
+            ) * Math.sin(radianDistance)))
         )
         var true_bearing = radian_bearing * (180 / 3.141592)
         if (Math.sin(targetLng - myLng) < 0) {
@@ -423,7 +417,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener {
         val transformableNode = TransformableNode(arFragment.transformationSystem)
         val rotateAngle = (-azimuthinDegress + angle) % 360
 
-        //tv2.setText(Float.toString(angle)+ " and "+Float.toString(azimuthinDegress)+" and "+Float.toString(rotateAngle));
         val quaternion1 = Quaternion.axisAngle(Vector3(0F, -1F, 0F), rotateAngle)
         transformableNode.worldRotation = quaternion1
         transformableNode.parent = anchorNode
