@@ -24,8 +24,6 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     private var address : String = ""
     private var title : String = ""
 
-    private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityConfirmplaceBinding.inflate(layoutInflater)

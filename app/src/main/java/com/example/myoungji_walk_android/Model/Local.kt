@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class Local(
-    @SerializedName("title") val title: String,
-    @SerializedName("address") val address: String,
-    @SerializedName("mapx") val mapx: Int,
-    @SerializedName("mapy") val mapy: Int
+    val title: String,
+    val address: String,
+    val mapx: Int,
+    val mapy: Int
 ) : Serializable

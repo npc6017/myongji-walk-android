@@ -11,6 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Myoungji_Walk_Android">
+        <activity
+            android:name=".PreviewRouteActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
@@ -25,11 +28,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchPlaceActivity"
-            android:noHistory="true"/>
+        <activity
+            android:name=".SearchPlaceActivity"
+            android:noHistory="true" />
         <activity
             android:name=".MainRouteSearchActivity"
-            android:noHistory="true"/>
+            android:noHistory="true" />
         <activity
             android:name=".ConfirmPlaceActivity"
             android:noHistory="true" />
@@ -38,7 +42,8 @@
             android:exported="false" />
         <activity
             android:name=".OptionSettingActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:noHistory="true"/>
     </application>
 
 </manifest>
