@@ -32,7 +32,6 @@ import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import kotlinx.coroutines.*
 import java.util.concurrent.CompletableFuture
@@ -61,11 +60,12 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
     lateinit var arFragment: ArFragment
     lateinit var arSceneView: ArSceneView
     private lateinit var camera: Camera
-    private var prevAnchorNode: AnchorNode? = null
     private val node = Node()
     lateinit var targetLocation: Location
     lateinit var lastLocation: Location
     private var angle = 0F // 북위각도
+    lateinit var session: Session
+    private lateinit var anchorNode: AnchorNode
 
     private var count = 0 // count 변수
     private lateinit var binding: FragmentArBinding
@@ -168,9 +168,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
 
         //ar 조명효과 비활성화
-        val session = Session(this)
+        session = Session(this)
         val config = session.config
         config.lightEstimationMode = Config.LightEstimationMode.DISABLED
+        //수평면만 감지
+        config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
         session.configure(config)
 
         camera = arSceneView.scene.camera
@@ -184,6 +186,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         }
 
+        //naverMap
         val fm = supportFragmentManager
         val mapFragment = fm.findFragmentById(R.id.map_fragment) as MapFragment?
             ?: MapFragment.newInstance().also {
@@ -193,8 +196,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         mapFragment.getMapAsync(this)
 
         arFragment.arSceneView.scene.addOnUpdateListener {
+            Log.d("addOnUpdateListenerCall", "call")
             checkPoint()
-            findAncher()
+            creatAncher()
         }
 
     }
@@ -301,49 +305,43 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         }
     }
 
-    private fun findAncher() {
-        CoroutineScope(Dispatchers.Main).launch {
-            //평면 지속적으로 탐색
-            val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
-                Plane::class.java
-            )
-            var planePose: Pose
-            var tmpPose: Pose
-            try {
-                for (plane: Plane in planes) {
-                    if (plane.trackingState == TrackingState.TRACKING) {
-                        if (count-- <= 0) {
-                        //센서를 통해서 평면 위치 계산후 방위각 계산
-                        planePose = plane.centerPose
-                        //내 위치를 화살표가 잘보이는 위치로 변경
-                        //핸드폰이 지변과 수직일 경우 : y = 10 x = 좌,우 10~-10 z = 뒤집기따라 10 ~ 10
-                        val dPose = arFragment.arSceneView.arFrame!!.camera.displayOrientedPose
-                        //평면의 Pose와 화면 계산
-                        val tmpVec = floatArrayOf(dPose.tx(), planePose.ty(), dPose.tz())
-                        tmpPose = Pose.makeTranslation(tmpVec)
+    private fun creatAncher() {
+        //탐지된 평면 데이터 가져오기
+        val planes = arFragment.arSceneView.arFrame!!.getUpdatedTrackables(
+            Plane::class.java
+        )
 
-                        //평면에 내가 바라보는 방향으로 Anchor 생성
-                        val anchor = plane.createAnchor(tmpPose)
-                        makeArrow(anchor, angle)
-                            count = 30
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                //Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-                Log.e("Error is detected : ", e.message!!)
+        val planePose: Pose
+        val tmpPose: Pose
+
+        for (plane: Plane in planes) {
+            if (plane.trackingState == TrackingState.TRACKING) {
+                //센서를 통해서 평면 위치 계산후 방위각 계산
+                planePose = plane.centerPose
+                //내 위치를 화살표가 잘보이는 위치로 변경
+                val dPose = arFragment.arSceneView.arFrame!!.camera.displayOrientedPose
+                //평면의 Pose와 화면 계산
+                val tmpVec = floatArrayOf(dPose.tx(), planePose.ty(), dPose.tz())
+                tmpPose = Pose.makeTranslation(tmpVec)
+
+                //평면에 내가 바라보는 방향으로 Anchor 생성
+                val anchor = plane.createAnchor(tmpPose)
+                makeArrow(anchor, angle)
+                return
             }
         }
+
     }
     //끝
 
     //이미지 만들기 - 방향 표시 화살표
     private fun makeArrow(anchor: Anchor, angle: Float) {
-        if (prevAnchorNode != null) {
-            prevAnchorNode!!.anchor!!.detach()
+        if (this::anchorNode.isInitialized && anchorNode.anchor != null) {
+            anchorNode.anchor!!.detach()
+            Log.d("detach", "detach")
         }
-        val anchorNode = AnchorNode(anchor)
-        prevAnchorNode = anchorNode
+
+        anchorNode = AnchorNode(anchor)
         ModelRenderable.builder()
             .setSource(this@ARActivity, Uri.parse("arrow.glb"))
             .setIsFilamentGltf(true)
