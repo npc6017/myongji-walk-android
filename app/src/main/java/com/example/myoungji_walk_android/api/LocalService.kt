@@ -8,14 +8,11 @@ import retrofit2.http.Query
 import retrofit2.http.Header
 
 interface LocalService {
-    @GET("/v1/search/local.json")
-    fun searchLocation(
-        @Header("X-Naver-Client-Id") clientId: String,
-        @Header("X-Naver-Client-Secret") clientSecret: String,
-        @Query("query") keyword: String
-    ): Call<LocalDto>
+    //todo token, 출발지이름, 목적지이름 추가 후 전송
+    @GET("/v3/7120375d-db91-4a43-8d32-c6c71681fea5")
+    fun searchLocation(): Call<LocalDto>
 
     //todo token, 출발지좌표, 목적지좌표, 옵션 추가해서 보내야함
-    @GET("/v3/16825ad2-52da-423f-87f9-dc49952ee028")
+    @GET("/v3/ca5bf253-9638-4798-801b-2dd1fb6f13fe")
     fun priviewRoute(): Call<RouteDto>
 }

@@ -12,11 +12,5 @@ class NavigationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        navigate()
-    }
-
-    private fun navigate(){
-        binding.textView1.text = "테스트"
     }
 }

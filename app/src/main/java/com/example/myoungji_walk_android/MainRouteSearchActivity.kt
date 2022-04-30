@@ -53,6 +53,7 @@ class MainRouteSearchActivity : AppCompatActivity() {
     private fun initOptionSettingButton(){
         binding.optionSettingButton.setOnClickListener {
             startActivity(Intent(this, OptionSettingActivity::class.java))
+            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
         }
     }
 

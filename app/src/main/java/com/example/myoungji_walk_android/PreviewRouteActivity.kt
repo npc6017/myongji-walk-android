@@ -1,9 +1,13 @@
 package com.example.myoungji_walk_android
 
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myoungji_walk_android.Adapter.NavigationListAdapter
 import com.example.myoungji_walk_android.Model.RouteDto
 import com.example.myoungji_walk_android.databinding.ActivityPreviewRouteBinding
 import com.naver.maps.geometry.LatLng
@@ -24,6 +28,9 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     private var coord = mutableListOf<LatLng>()
     private val path = PathOverlay()
     private lateinit var route : RouteDto
+    private var option : Int = 0
+
+    private val recyclerViewAdapter = NavigationListAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +39,57 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.mapView.getMapAsync(this)
 
         route = intent.getSerializableExtra("route") as RouteDto
+        option = intent.getIntExtra("option", 0)
         getList()
+        initButton()
+        initData()
+
+        binding.bottomSheetLayout.recyclerView.adapter = recyclerViewAdapter
+        binding.bottomSheetLayout.recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    inner class buttonListener : View.OnClickListener {
+        override fun onClick(v: View?) {
+            when(v?.id){
+                binding.cardViewLayout.detailButton.id -> {
+                    binding.bottomSheetLayout.root.visibility = View.VISIBLE
+                    when(option){
+                        1 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "가장 빠른"
+                        2 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "안전한"
+                        3 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "완만한"
+                        4 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "계단 없는"
+                    }
+                    binding.cardViewLayout.root.visibility = View.GONE
+                }
+                binding.cardViewLayout.guideButton.id -> {
+                    val intent = Intent(this@PreviewRouteActivity, NavigationActivity::class.java)
+                    with(intent) {
+                        //todo 경로전달
+                        startActivity(intent)
+                        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                    }
+                }
+                binding.bottomSheetLayout.bottomSheetGuideButton.id -> {
+                    val intent = Intent(this@PreviewRouteActivity, NavigationActivity::class.java)
+                    with(intent) {
+                        //todo 경로전달
+                        startActivity(intent)
+                        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initData(){
+        route.let {
+            recyclerViewAdapter.submitList(it.guide)
+        }
+    }
+    private fun initButton(){
+        binding.cardViewLayout.detailButton.setOnClickListener(buttonListener())
+        binding.cardViewLayout.guideButton.setOnClickListener(buttonListener())
+        binding.bottomSheetLayout.bottomSheetGuideButton.setOnClickListener(buttonListener())
     }
 
     private fun getList(){

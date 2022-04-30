@@ -28,6 +28,7 @@ class MapFragment : Fragment() {
         binding.buttonInputPlace.setOnClickListener {
             val intent = Intent(requireContext(), SearchPlaceActivity::class.java)
             startActivity(intent)
+            activity?.overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
         }
     }
 
@@ -35,6 +36,7 @@ class MapFragment : Fragment() {
         binding.buttonFindDirection.setOnClickListener {
             val intent = Intent(requireContext(), MainRouteSearchActivity::class.java)
             startActivity(intent)
+            activity?.overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
         }
     }
 

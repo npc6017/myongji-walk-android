@@ -2,7 +2,6 @@ package com.example.myoungji_walk_android
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
@@ -51,19 +50,14 @@ class SearchPlaceActivity : AppCompatActivity() {
             val placeText = binding.placeEditTextView.text.toString()
             //todo 장소 검색
 
-            localService.searchLocation("0PHVMAyEtyJDZT4EAIIa", "XTmX3SVc6G", placeText)
+            localService.searchLocation()
                 .enqueue(object: Callback<LocalDto> {
                     override fun onResponse(call: Call<LocalDto>, response: Response<LocalDto>) {
                         if(response.isSuccessful.not()) {
                             return
                         }
                         response.body()?.let {
-                            Log.d("SearchPlaceActivity", it.toString())
-                            it.items.forEach { local ->
-                                Log.d("SearchPlaceActivity", local.toString())
-                            }
-                            val data = LocalDto(it.start, it.items)
-                            Log.d("SearchPlaceActivity:itemlist", data.toString())
+                            val data = LocalDto(it.place, it.location)
                             saveSearchKeyword(placeText)
                             val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
                             with(intent) {
@@ -71,6 +65,7 @@ class SearchPlaceActivity : AppCompatActivity() {
                                 //flag_acitivity_single_top -> 이미 생성된 메인액티비티를 그대로 사용할 수 있나?
                                 //setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                 startActivity(this)
+                                overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                             }
                         }
                     }

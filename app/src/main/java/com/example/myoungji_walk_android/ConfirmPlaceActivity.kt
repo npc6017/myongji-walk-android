@@ -19,10 +19,8 @@ import com.naver.maps.map.overlay.Marker
 class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     private lateinit var binding : ActivityConfirmplaceBinding
     private lateinit var naverMap: NaverMap
-    private var mapx : Int = 0
-    private var mapy : Int = 0
-    private var address : String = ""
     private var title : String = ""
+    private lateinit var data : LocalDto
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,11 +28,9 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
         binding.mapView.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        val data = intent.getSerializableExtra("data") as LocalDto
-        Log.d("ConfirmPlaceActivity", data.toString())
-
+        data = intent.getSerializableExtra("data") as LocalDto
+        title = data.place
         binding.mapView.getMapAsync(this)
-        initData(data)
 
         initButton()
         initLocalCardView(data)
@@ -51,6 +47,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                         putExtra("title", title)
                         putExtra("divisionLocal", 101)
                         startActivity(intent)
+                        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }
                 binding.cardViewLayout.destinationButton.id -> {
@@ -59,6 +56,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                         putExtra("title", title)
                         putExtra("divisionLocal", 102)
                         startActivity(intent)
+                        overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }
                 binding.cardViewLayout.bookMarkButton.id -> {
@@ -67,8 +65,6 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
             }
         }
     }
-
-
     private fun initButton(){
         binding.backButton.setOnClickListener(buttonListener())
         binding.cardViewLayout.startingPointButton.setOnClickListener(buttonListener())
@@ -77,33 +73,17 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     }
 
     private fun initLocalCardView(data : LocalDto){
-       data.items.forEach {
-           binding.cardViewLayout.title.text = it.title
-        }
-    }
-
-    private fun initData(data : LocalDto){
-        data.items.forEach {
-            binding.localName.text = it.title
-            title = it.title
-            mapx = it.mapx
-            mapy = it.mapy
-            address = it.address
-        }
+        binding.cardViewLayout.title.text = data.place
     }
 
     override fun onMapReady(map: NaverMap) {
         naverMap = map
         naverMap.minZoom = 10.0
         naverMap.maxZoom = 18.0
-        val tm128 = Tm128(mapx.toDouble(), mapy.toDouble())
-        val lat = tm128.toLatLng().latitude
-        val lng = tm128.toLatLng().longitude
-        val cameraUpdate = CameraUpdate.scrollTo(tm128.toLatLng())
-        Log.d("ConfirmPlace :: ", tm128.toLatLng().toString())
+        val cameraUpdate = CameraUpdate.scrollTo(LatLng(data.location[0], data.location[1]))
         naverMap.moveCamera(cameraUpdate)
         val marker = Marker()
-        marker.position = LatLng(lat, lng)
+        marker.position = LatLng(data.location[0], data.location[1])
         marker.map = naverMap
     }
 

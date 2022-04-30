@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/baseline_straight_24.xml" value="0.158" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/baseline_turn_left_24.xml" value="0.158" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/baseline_turn_right_24.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/btn_ripple_effect_light_blue.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_arrow_back_ios_new_24.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.14" />
@@ -10,6 +13,8 @@
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_black.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_blue.xml" value="0.14" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/scroll_check_background.xml" value="0.1235" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/top_radius_white_background.xml" value="0.1235" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_confirmplace.xml" value="0.25364583333333335" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_main.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_mainroutesearch.xml" value="0.1484375" />
@@ -17,11 +22,15 @@
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_option_setting.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_preview_route.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_searchplace.xml" value="0.1484375" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/bottom_sheet.xml" value="0.1125" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/bottom_sheet_navigation_list.xml" value="0.1" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/fragment_bestplace.xml" value="0.1125" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/fragment_map.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/fragment_setting.xml" value="0.1125" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_guide_cardview.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_history.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_local_cardview.xml" value="0.1484375" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_navigation.xml" value="0.1125" />
       </map>
     </option>
   </component>

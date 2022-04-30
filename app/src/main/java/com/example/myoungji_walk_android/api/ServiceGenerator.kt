@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceGenerator {
     private val builder = Retrofit.Builder()
-        .baseUrl("https://openapi.naver.com")
+        .baseUrl("https://run.mocky.io")
         .addConverterFactory(GsonConverterFactory.create())
     private val retrofit = builder.build()
 

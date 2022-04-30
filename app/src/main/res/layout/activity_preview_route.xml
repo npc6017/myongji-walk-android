@@ -15,4 +15,9 @@
         android:id="@+id/cardViewLayout"
         layout="@layout/item_guide_cardview" />
 
+    <include
+        android:id="@+id/bottomSheetLayout"
+        android:visibility="gone"
+        layout="@layout/bottom_sheet_navigation_list" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
