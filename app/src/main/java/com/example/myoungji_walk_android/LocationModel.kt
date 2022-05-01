@@ -16,7 +16,7 @@ class LocationModel {
     }
 
     //내 위치에서 원하는 위치로 갈 때 회전각 계산
-     fun gpsToDegree(myLocation: Location, targetLocation: Location?): Double {
+     fun getAngle(myLocation: Location, targetLocation: Location?): Double {
 
         //내 위치 위도 경도를 라디안으로 변환
         val myLat = myLocation.latitude * (3.141592 / 180)
