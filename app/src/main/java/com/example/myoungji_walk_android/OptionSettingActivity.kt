@@ -3,23 +3,19 @@ package com.example.myoungji_walk_android
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import com.example.myoungji_walk_android.Model.LocalDto
 import com.example.myoungji_walk_android.Model.RouteDto
-import com.example.myoungji_walk_android.api.LocalService
+import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivityOptionSettingBinding
-import com.naver.maps.geometry.LatLng
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class OptionSettingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOptionSettingBinding
-    private val localService = ServiceGenerator.createService(LocalService::class.java)
+    private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java, PrefsHelper.read("token",""))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +48,7 @@ class OptionSettingActivity : AppCompatActivity() {
     }
 
     private fun getListFromAPI(option : Int) {
-        localService.priviewRoute()
+        retrofitService.priviewRoute()
             .enqueue(object : Callback<RouteDto> {
                 override fun onResponse(
                     call: Call<RouteDto>,

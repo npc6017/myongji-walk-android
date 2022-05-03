@@ -5,46 +5,56 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.example.myoungji_walk_android.api.LocalService
+import com.example.myoungji_walk_android.Model.User
+import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivityLoginBinding
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityLoginBinding
-    private val localService = ServiceGenerator.createService(LocalService::class.java)
+    var retrofitService: RetrofitService? = null
+    val nonTokenService = ServiceGenerator.createService(RetrofitService::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initButton()
+        PrefsHelper.init(applicationContext)
     }
 
     private fun getTokenAPI() {
-        localService.loginService()
-            .enqueue(object : Callback<ResponseBody> {
+        nonTokenService.loginService()
+            .enqueue(object : Callback<User> {
                 override fun onResponse(
-                    call: Call<ResponseBody>,
-                    response: Response<ResponseBody>
+                    call: Call<User>,
+                    response: Response<User>
                 ) {
                     //성공
                     if (response.isSuccessful.not()) {
                         //실패 처리에 대한 구현
                         return
                     }
-                    val token = response.headers().get("token")
-                    Log.d("LoginActivity::token", token.toString())
-                    //tokenManager.set(token)
+                    val token = response.headers().get("Authorization")
+                    retrofitService = ServiceGenerator.createService(RetrofitService::class.java, token)
+                    response.body()?.let {
+                        //Log.d("LoginActivity", it.name)
+                        PrefsHelper.write("token", token)
+                        PrefsHelper.write("email", it.email)
+                        PrefsHelper.write("name", it.name)
+                        PrefsHelper.write("grade", it.grade)
+                    }
                     Log.d("LoginActivity", response.code().toString())
 
                 }
 
-                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                override fun onFailure(call: Call<User>, t: Throwable) {
                     //실패
                 }
             })
@@ -69,8 +79,8 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
                 binding.loginButton.id -> {
-                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     getTokenAPI()
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     with(intent) {
                         startActivity(this)
                         overridePendingTransition(

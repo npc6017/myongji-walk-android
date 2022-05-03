@@ -8,8 +8,9 @@ import androidx.room.Room
 import com.example.myoungji_walk_android.Adapter.HistoryAdapter
 import com.example.myoungji_walk_android.Model.History
 import com.example.myoungji_walk_android.Model.LocalDto
-import com.example.myoungji_walk_android.api.LocalService
+import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivitySearchplaceBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,7 +21,7 @@ class SearchPlaceActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchplaceBinding
     private lateinit var db: AppDataBase
     private lateinit var historyAdapter: HistoryAdapter
-    private val localService = ServiceGenerator.createService(LocalService::class.java)
+    private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java, PrefsHelper.read("token",""))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +50,7 @@ class SearchPlaceActivity : AppCompatActivity() {
         binding.searchButton.setOnClickListener {
             val placeText = binding.placeEditTextView.text.toString()
             //todo 장소 검색
-
-            localService.searchLocation()
+            retrofitService.searchLocation()
                 .enqueue(object: Callback<LocalDto> {
                     override fun onResponse(call: Call<LocalDto>, response: Response<LocalDto>) {
                         if(response.isSuccessful.not()) {

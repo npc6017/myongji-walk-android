@@ -2,10 +2,12 @@ package com.example.myoungji_walk_android
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.example.myoungji_walk_android.Adapter.ViewPageAdapter
 import com.example.myoungji_walk_android.Fragment.BestPlaceFragment
 import com.example.myoungji_walk_android.Fragment.MapFragment
 import com.example.myoungji_walk_android.Fragment.SettingFragment
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -31,6 +33,4 @@ class MainActivity : AppCompatActivity() {
             }.attach()
         }
     }
-
-
 }
