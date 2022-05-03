@@ -1,16 +1,33 @@
 package com.example.myoungji_walk_android.api
 
+import android.text.TextUtils
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 
 object ServiceGenerator {
+    private const val BASE_URL = "https://run.mocky.io/"
+    private val httpClient = OkHttpClient.Builder()
     private val builder = Retrofit.Builder()
-        .baseUrl("https://run.mocky.io")
+        .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
-    private val retrofit = builder.build()
-
+    private var retrofit = builder.build()
     fun <S> createService(serviceClass: Class<S>?): S {
+        return createService(serviceClass, null)
+    }
+
+    fun <S> createService(
+        serviceClass: Class<S>?, authToken: String?
+    ): S {
+        if (!TextUtils.isEmpty(authToken)) {
+            val interceptor = AuthenticationInterceptor(authToken!!)
+            if (!httpClient.interceptors().contains(interceptor)) {
+                httpClient.addInterceptor(interceptor)
+                builder.client(httpClient.build())
+                retrofit = builder.build()
+            }
+        }
         return retrofit.create(serviceClass)
     }
 }

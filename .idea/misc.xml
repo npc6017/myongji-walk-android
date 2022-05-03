@@ -9,13 +9,19 @@
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/btn_ripple_effect_light_blue.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_arrow_back_ios_new_24.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.14" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_lock_24.xml" value="0.158" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.14" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/line.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_black.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_blue.xml" value="0.14" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/scroll_check_background.xml" value="0.1235" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/top_radius_white_background.xml" value="0.1235" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout-w1240dp/activity_join.xml" value="0.1" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_confirmplace.xml" value="0.25364583333333335" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_join.xml" value="0.1484375" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_login.xml" value="0.1" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_main.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_mainroutesearch.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_navigation.xml" value="0.25364583333333335" />
