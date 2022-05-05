@@ -1,6 +1,7 @@
 package com.example.myoungji_walk_android
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
 import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
@@ -39,21 +41,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.internal.Internal.instance
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 
 class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback {
 
     //센서 변수
-    lateinit var mSensorManager: SensorManager
-    lateinit var mAccelerometer: Sensor
-    lateinit var mMagnetometer: Sensor
+    private lateinit var mSensorManager: SensorManager
+    private lateinit var mAccelerometer: Sensor
+    private lateinit var mMagnetometer: Sensor
     lateinit var mLocation: Location
-    lateinit var locationManager: LocationManager
-    private var azimuthinDegress = 0f  // y축 각도
+    private lateinit var locationManager: LocationManager
+    private var azimuthDegrees = 0f  // y축 각도
     private val noAccel = floatArrayOf(0f, 3f, 3f)
     private val mLastMagnetometer = FloatArray(3)
     private var mLastAccelerometerSet = false
@@ -62,16 +64,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
     private val mOrientation = FloatArray(3)
 
     //AR 변수
-    lateinit var checkPointRender: ModelRenderable
-    lateinit var arrowRender: ModelRenderable
-
-    lateinit var arFragment: ArFragment
-    lateinit var arSceneView: ArSceneView
-    private lateinit var camera: Camera
+    private lateinit var arFragment: ArFragment
     private val node = Node()
-    lateinit var targetLocation: Location
-    lateinit var lastLocation: Location
-    var angle = 0F // 북위각도
+    private lateinit var targetLocation: Location
+    private lateinit var lastLocation: Location
+    private var angle = 0F // 북위각도
     lateinit var session: Session
     private lateinit var anchorNode: AnchorNode
 
@@ -113,12 +110,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         override fun onLocationChanged(location: Location) {
             mLocation = location
 
-            val longitude = location.longitude
-            val latitude = location.latitude
-
-            Log.d("Location", "Latitude : $latitude, Longitude : $longitude")
         }
-
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
     }
@@ -129,6 +121,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         locationModel = LocationModel()
         modelRender = ModelRender()
+
+        modelRender.checkPointModel()
+        modelRender.arrowModel()
 
         //tast checkpoint. 추후 서버에서 받아올 수 있도록
         gpsNodePointArrayList.addAll(listOf(*gpsNodePoint))
@@ -147,8 +142,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
             mLocation = Location("myLoc")
         }
 
-
-
         checkPermission()
         locationManager.requestLocationUpdates(
             LocationManager.GPS_PROVIDER,
@@ -157,61 +150,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
             locationListener
         )
 
-        //AR 이미지 초기화
-        val goal = ModelRenderable.builder()
-            .setSource(this, Uri.parse("check_point.glb"))
-            .setIsFilamentGltf(true)
-            .setAsyncLoadEnabled(true)
-            .build()
-        CompletableFuture.allOf(goal)
-            .handle<Any?> { notUsed: Void?, throwable: Throwable? ->
-                if (throwable != null) {
-                    return@handle null
-                }
-                try {
-                    checkPointRender = goal.get()
-                } catch (e: InterruptedException) {
-                    e.getStackTrace()
-                } catch (e: ExecutionException) {
-                    e.getStackTrace()
-                }
-                null
-            }
-
-        val goal2 = ModelRenderable.builder()
-            .setSource(this, Uri.parse("arrow.glb"))
-            .setIsFilamentGltf(true)
-            .setAsyncLoadEnabled(true)
-            .build()
-        CompletableFuture.allOf(goal2)
-            .handle<Any?> { notUsed: Void?, throwable: Throwable? ->
-                if (throwable != null) {
-                    return@handle null
-                }
-                try {
-                    arrowRender = goal2.get()
-
-                    arSceneView.session?.apply {
-                        session = arSceneView.session!!
-                        val config = session.config
-                        config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
-                        config.lightEstimationMode = Config.LightEstimationMode.DISABLED
-                        arFragment.arSceneView.session!!.configure(config)
-                    }
-
-                } catch (e: InterruptedException) {
-                    e.stackTrace
-                } catch (e: ExecutionException) {
-                    e.stackTrace
-                }
-                null
-            }
-
         //AR 화면 실행
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
-        arSceneView = arFragment.arSceneView
-
-        camera = arSceneView.scene.camera
 
         CoroutineScope(Dispatchers.Main).launch {
             while (true) {
@@ -219,7 +159,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 checkPointCal()
                 delay(1000)
             }
-
         }
 
         //naverMap
@@ -232,11 +171,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         mapFragment.getMapAsync(this)
 
         arFragment.arSceneView.scene.addOnUpdateListener {
-            //Log.d("addOnUpdateListenerCall", "call")
             CoroutineScope(Dispatchers.Main).launch {
                 createAnchor()
             }
         }
+
     }
 
     //가속도, 자기장 센서 값 받아오기
@@ -251,7 +190,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         if (mLastAccelerometerSet && mLastMagnetometerSet) {
             SensorManager.getRotationMatrix(mR, null, noAccel, mLastMagnetometer)
 
-            azimuthinDegress = ((Math.toDegrees(
+            azimuthDegrees = ((Math.toDegrees(
                 SensorManager.getOrientation(mR, mOrientation)[0]
                     .toDouble()
             ) + 360).toInt() % 360).toFloat()
@@ -260,8 +199,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
-    var currentDistance: Double = 0.0
-    var lastDistance: Double = 0.0
+    private var currentDistance: Double = 0.0
+    private var lastDistance: Double = 0.0
 
     //가장 가까운 좌표와 다음 좌표의 거리 계산
     private fun distanceCal() {
@@ -323,10 +262,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                     finish()
                 }
             } catch (e: Exception) {
-                finish()
-                Log.e("Error is detected : ", e.message!!)
                 Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-                Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
+                finish()
             }
         }else{
                 Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
@@ -367,25 +304,37 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
     private fun addToModelScene() {
         val transformableNode = TransformableNode(arFragment.transformationSystem)
-        val rotateAngle = (-azimuthinDegress + angle) % 360
+        val rotateAngle = (-azimuthDegrees + angle) % 360
 
         val quaternion1 = Quaternion.axisAngle(Vector3(0F, -1F, 0F), rotateAngle)
         transformableNode.worldRotation = quaternion1
         transformableNode.parent = anchorNode
         transformableNode.select()
-        transformableNode.renderable = arrowRender
+        transformableNode.renderable = modelRender.arrowRender
         arFragment.arSceneView.scene.addChild(anchorNode)
 
-        node.parent = anchorNode
-        node.renderable = checkPointRender
+        node.parent = transformableNode
+        node.renderable = modelRender.checkPointRender
 
         val newPosition = transformableNode.worldPosition
-        node.localPosition = (Vector3(newPosition.x, newPosition.y+1F, newPosition.z+3F))
+        node.localPosition = (Vector3(newPosition.x+1F, newPosition.y+1F, newPosition.z+1F))
 
     }
 
     override fun onResume() {
         super.onResume()
+
+        /*
+        arSceneView.session?.apply {
+            session = arSceneView.session!!
+            val config = session.config
+            config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
+            config.lightEstimationMode = Config.LightEstimationMode.DISABLED
+            arFragment.arSceneView.session!!.configure(config)
+        }
+
+         */
+
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME)
         mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME)
     }
@@ -402,9 +351,18 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         session.close()
     }
 
+    init{
+        instance = this
+    }
+
     companion object {
         //GPS 변수
         private val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10
+
+        private var instance:ARActivity? = null
+        fun getInstance(): ARActivity? {
+            return instance
+        }
     }
 
     override fun onMapReady(naverMap: NaverMap) {
