@@ -23,6 +23,14 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/angle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@android:color/holo_red_light"
+                android:textSize="20sp" />
+
+            <TextView
                 android:id="@+id/checkPoint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,7 +60,7 @@
             android:id="@+id/bottom_sheet"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:descendantFocusability="beforeDescendants"
+            android:descendantFocusability="blocksDescendants"
             android:focusableInTouchMode="true"
             android:orientation="vertical"
             android:padding="10dp"
@@ -61,11 +69,19 @@
             app:cardCornerRadius="50dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-            <fragment
-                android:id="@+id/map_fragment"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:name="com.naver.maps.map.MapFragment" />
+                android:orientation="vertical">
+
+                <fragment
+                    android:id="@+id/map_fragment"
+                    android:name="com.naver.maps.map.MapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
 
         </androidx.cardview.widget.CardView>
 
