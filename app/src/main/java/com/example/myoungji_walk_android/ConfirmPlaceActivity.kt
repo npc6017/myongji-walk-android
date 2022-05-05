@@ -4,8 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
+import com.example.myoungji_walk_android.Model.BookMark
+import com.example.myoungji_walk_android.Model.History
 import com.example.myoungji_walk_android.Model.LocalDto
 import com.example.myoungji_walk_android.databinding.ActivityConfirmplaceBinding
 import com.naver.maps.geometry.LatLng
@@ -18,6 +22,7 @@ import com.naver.maps.map.overlay.Marker
 
 class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     private lateinit var binding : ActivityConfirmplaceBinding
+    private lateinit var db: AppDataBaseBookMark
     private lateinit var naverMap: NaverMap
     private var title : String = ""
     private lateinit var data : LocalDto
@@ -27,6 +32,11 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
         binding = ActivityConfirmplaceBinding.inflate(layoutInflater)
         binding.mapView.onCreate(savedInstanceState)
         setContentView(binding.root)
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDataBaseBookMark::class.java,
+            "BookMarkDB"
+        ).build()
 
         data = intent.getSerializableExtra("data") as LocalDto
         title = data.place
@@ -59,17 +69,37 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                         overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }
-                binding.cardViewLayout.bookMarkButton.id -> {
+                binding.cardViewLayout.bookMarkCheckBox.id -> {
                     //todo 즐겨찾기
+                    if(binding.cardViewLayout.bookMarkCheckBox.isChecked){
+                        saveBookMark(binding.cardViewLayout.title.text.toString())
+                        Log.d("ConfirmPlaceActivity", "저장")
+                    }
+                    else {
+                        deleteBookMark(binding.cardViewLayout.title.text.toString())
+                    }
                 }
             }
         }
     }
+
+    private fun saveBookMark(keyword: String){
+        Thread {
+            db.bookMarkDao().insertHistory(BookMark(null, keyword))
+        }.start()
+    }
+
+    private fun deleteBookMark(keyword: String){
+        Thread {
+            db.bookMarkDao().delete(keyword)
+        }.start()
+    }
+
     private fun initButton(){
         binding.backButton.setOnClickListener(buttonListener())
         binding.cardViewLayout.startingPointButton.setOnClickListener(buttonListener())
         binding.cardViewLayout.destinationButton.setOnClickListener(buttonListener())
-        binding.cardViewLayout.bookMarkButton.setOnClickListener(buttonListener())
+        binding.cardViewLayout.bookMarkCheckBox.setOnClickListener(buttonListener())
     }
 
     private fun initLocalCardView(data : LocalDto){

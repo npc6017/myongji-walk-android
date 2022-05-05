@@ -4,12 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
+import com.example.myoungji_walk_android.Adapter.BookMarkAdapter
+import com.example.myoungji_walk_android.Adapter.HistoryAdapter
+import com.example.myoungji_walk_android.Adapter.NavigationListAdapter
 import com.example.myoungji_walk_android.databinding.ActivityMainroutesearchBinding
 
 class MainRouteSearchActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityMainroutesearchBinding
     private var divisionLocal : Int? = 0
+    private lateinit var db: AppDataBaseBookMark
+    private val bookMarkAdapter = BookMarkAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,9 +25,17 @@ class MainRouteSearchActivity : AppCompatActivity() {
 
         divisionLocal = intent?.getIntExtra("divisionLocal", 0)
 
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDataBaseBookMark::class.java,
+            "BookMarkDB"
+        ).build()
+
         initButton()
         initOptionSettingButton()
         initText()
+        initBookMarkRecyclerView()
+        showBookMarkView()
     }
 
     inner class initListener : View.OnClickListener {
@@ -42,6 +57,20 @@ class MainRouteSearchActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    private fun showBookMarkView(){
+        Thread {
+            val keywords = db.bookMarkDao().getAll().reversed()
+            runOnUiThread {
+                bookMarkAdapter.submitList(keywords.orEmpty())
+            }
+        }.start()
+    }
+
+    private fun initBookMarkRecyclerView(){
+        binding.bookMarkRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.bookMarkRecyclerView.adapter = bookMarkAdapter
     }
 
     private fun initButton(){

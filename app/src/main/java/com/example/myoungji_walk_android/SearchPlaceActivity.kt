@@ -21,7 +21,7 @@ class SearchPlaceActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchplaceBinding
     private lateinit var db: AppDataBase
     private lateinit var historyAdapter: HistoryAdapter
-    private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java, PrefsHelper.read("token",""))
+    private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
