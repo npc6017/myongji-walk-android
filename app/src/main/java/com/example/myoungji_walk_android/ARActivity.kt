@@ -1,7 +1,7 @@
 package com.example.myoungji_walk_android
 
 import android.Manifest
-import android.content.Context
+import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -10,25 +10,22 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.view.KeyCharacterMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
 import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
-import com.google.ar.sceneform.Camera
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
-import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import com.naver.maps.geometry.LatLng
@@ -41,11 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.Internal.instance
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-
 
 class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback {
 
@@ -65,6 +58,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
     //AR 변수
     private lateinit var arFragment: ArFragment
+    private lateinit var arSceneView: ArSceneView
     private val node = Node()
     private lateinit var targetLocation: Location
     private lateinit var lastLocation: Location
@@ -152,6 +146,15 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         //AR 화면 실행
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
+        arSceneView = arFragment.arSceneView
+
+        arSceneView.session = Session(this)
+
+        session = arSceneView.session!!
+        val config = session.config
+        config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
+        config.lightEstimationMode = Config.LightEstimationMode.DISABLED
+        arSceneView.session!!.configure(config)
 
         CoroutineScope(Dispatchers.Main).launch {
             while (true) {
@@ -175,7 +178,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 createAnchor()
             }
         }
-
     }
 
     //가속도, 자기장 센서 값 받아오기
@@ -324,16 +326,15 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
     override fun onResume() {
         super.onResume()
 
-        /*
         arSceneView.session?.apply {
             session = arSceneView.session!!
             val config = session.config
             config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
             config.lightEstimationMode = Config.LightEstimationMode.DISABLED
-            arFragment.arSceneView.session!!.configure(config)
+            arSceneView.session!!.configure(config)
         }
 
-         */
+
 
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME)
         mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME)
