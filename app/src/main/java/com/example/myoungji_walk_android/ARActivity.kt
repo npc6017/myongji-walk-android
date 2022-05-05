@@ -11,6 +11,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -40,6 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -136,8 +138,16 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-        mLocation = locationManager
-            .getLastKnownLocation(LocationManager.GPS_PROVIDER)!!
+        if (locationManager
+                .getLastKnownLocation(LocationManager.GPS_PROVIDER) != null
+        ) {
+            mLocation = locationManager
+                .getLastKnownLocation(LocationManager.GPS_PROVIDER)!!
+        }else{
+            mLocation = Location("myLoc")
+        }
+
+
 
         checkPermission()
         locationManager.requestLocationUpdates(
@@ -181,13 +191,13 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 try {
                     arrowRender = goal2.get()
 
-                        arSceneView.session?.apply {
-                            session = arSceneView.session!!
-                            val config = session.config
-                            config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
-                            config.lightEstimationMode = Config.LightEstimationMode.DISABLED
-                            arFragment.arSceneView.session!!.configure(config)
-                        }
+                    arSceneView.session?.apply {
+                        session = arSceneView.session!!
+                        val config = session.config
+                        config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
+                        config.lightEstimationMode = Config.LightEstimationMode.DISABLED
+                        arFragment.arSceneView.session!!.configure(config)
+                    }
 
                 } catch (e: InterruptedException) {
                     e.stackTrace
@@ -203,7 +213,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         camera = arSceneView.scene.camera
 
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             while (true) {
                 distanceCal()
                 checkPointCal()
@@ -278,81 +288,48 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
     }
 
-/*
-    private fun checkPoint() {
-        //체크포인트 표시
-        Log.d("abs",(abs(angle - azimuthinDegress)).toString())
-        if (abs(angle - azimuthinDegress) <= 10 && currentDistance <= 4) {
-            Log.d("rander","rander")
-
-            node.parent = arSceneView.scene
-            node.renderable = checkPointRender
-
-            val ray = camera.screenPointToRay(1000 / 2f, 500f)
-            val newPosition = ray.getPoint((currentDistance / 5).toFloat())
-            node.localPosition = newPosition
-        } else {
-            node.renderable = null
-        }
-    }
-
- */
-
-
-    private fun checkPoint() {
-        //체크포인트 표시
-        Log.d("abs", (abs(angle - azimuthinDegress)).toString())
-
-        if (abs(angle - azimuthinDegress) <= 10) {
-            node.parent = arSceneView.scene
-            node.renderable = checkPointRender
-
-            val ray = camera.screenPointToRay(1000 / 2f, 500f)
-            val newPosition = ray.getPoint((currentDistance / 20).toFloat())
-            node.localPosition = newPosition
-        }
-        else {
-            node.renderable = null
-        }
-    }
-
-
     private fun checkPointCal() {
-        //일정 거리 이상 가까이 오면 다음 체크포인트로
-        if (currentDistance <= 4) {
-            gpsNodePointArrayList.removeAt(0)
-        }
-        val tmp2 = locationModel.getDistance(targetLocation, lastLocation)
-        if (tmp2 > lastDistance) {
-            gpsNodePointArrayList.removeAt(0)
-        }
-        //남은 체크포인트 중 지나친 체크포인트 체크
-        try {
-            if (gpsNodePointArrayList.size > 0) {
-                for (i in gpsNodePointArrayList.indices) {
-                    val tmp = locationModel.getDistance(
-                        mLocation, locationModel.coordToLocation(
-                            gpsNodePointArrayList[i][0],
-                            gpsNodePointArrayList[i][1]
-                        )
-                    )
-                    //다음 점이 더 가깝고 일정 거리 이하라면
-                    if (currentDistance > tmp) {
-                        for (j in 0..i) {
-                            gpsNodePointArrayList.removeAt(j)
-                        }
-                        break
-                    }
-                }
-            } else {
-                Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
-                finish()
+        if(TimeUnit.NANOSECONDS.toSeconds(
+                SystemClock.elapsedRealtimeNanos()
+                    - mLocation.getElapsedRealtimeNanos())<100) {
+            //일정 거리 이상 가까이 오면 다음 체크포인트로
+            if (currentDistance <= 4) {
+                gpsNodePointArrayList.removeAt(0)
             }
-        } catch (e: Exception) {
-            finish()
-            Log.e("Error is detected : ", e.message!!)
-            Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
-            Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
+            val tmp2 = locationModel.getDistance(targetLocation, lastLocation)
+            if (tmp2 > lastDistance) {
+                gpsNodePointArrayList.removeAt(0)
+            }
+            //남은 체크포인트 중 지나친 체크포인트 체크
+            try {
+                if (gpsNodePointArrayList.size > 0) {
+                    for (i in gpsNodePointArrayList.indices) {
+                        val tmp = locationModel.getDistance(
+                            mLocation, locationModel.coordToLocation(
+                                gpsNodePointArrayList[i][0],
+                                gpsNodePointArrayList[i][1]
+                            )
+                        )
+                        //다음 점이 더 가깝고 일정 거리 이하라면
+                        if (currentDistance > tmp) {
+                            for (j in 0..i) {
+                                gpsNodePointArrayList.removeAt(j)
+                            }
+                            break
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "경로 탐색 완료!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            } catch (e: Exception) {
+                finish()
+                Log.e("Error is detected : ", e.message!!)
+                Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "경로 탐색 종료", Toast.LENGTH_SHORT).show()
+            }
+        }else{
+                Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -382,14 +359,12 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 val anchor = plane.createAnchor(tmpPose)
                 anchorNode = AnchorNode(anchor)
                 addToModelScene()
-                checkPoint()
 
                 return
             }
         }
     }
 
-    //찾은 앵커에 3D 모델을 만듦
     private fun addToModelScene() {
         val transformableNode = TransformableNode(arFragment.transformationSystem)
         val rotateAngle = (-azimuthinDegress + angle) % 360
@@ -400,6 +375,12 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         transformableNode.select()
         transformableNode.renderable = arrowRender
         arFragment.arSceneView.scene.addChild(anchorNode)
+
+        node.parent = anchorNode
+        node.renderable = checkPointRender
+
+        val newPosition = transformableNode.worldPosition
+        node.localPosition = (Vector3(newPosition.x, newPosition.y+1F, newPosition.z+3F))
 
     }
 
