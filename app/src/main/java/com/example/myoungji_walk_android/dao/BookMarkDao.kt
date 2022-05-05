@@ -15,4 +15,7 @@ interface BookMarkDao {
 
     @Query("DELETE FROM bookmark WHERE keyword == :keyword")
     fun delete(keyword: String)
+
+    @Query("SELECT EXISTS (SELECT * FROM bookmark WHERE keyword == :keyword)")
+    fun search(keyword: String) : Boolean
 }

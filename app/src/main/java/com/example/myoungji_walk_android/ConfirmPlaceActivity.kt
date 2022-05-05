@@ -70,10 +70,8 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                     }
                 }
                 binding.cardViewLayout.bookMarkCheckBox.id -> {
-                    //todo 즐겨찾기
                     if(binding.cardViewLayout.bookMarkCheckBox.isChecked){
                         saveBookMark(binding.cardViewLayout.title.text.toString())
-                        Log.d("ConfirmPlaceActivity", "저장")
                     }
                     else {
                         deleteBookMark(binding.cardViewLayout.title.text.toString())
@@ -81,6 +79,14 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                 }
             }
         }
+    }
+
+    private fun initBookMarkButton(keyword: String){
+        Thread {
+            if(db.bookMarkDao().search((keyword))){
+                binding.cardViewLayout.bookMarkCheckBox.isChecked = true
+            }
+        }.start()
     }
 
     private fun saveBookMark(keyword: String){
@@ -103,6 +109,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     }
 
     private fun initLocalCardView(data : LocalDto){
+        initBookMarkButton(data.place)
         binding.cardViewLayout.title.text = data.place
     }
 
