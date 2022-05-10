@@ -14,7 +14,7 @@ class ModelRender {
     fun checkPointModel() {
         //AR 이미지 초기화
         val render = ModelRenderable.builder()
-            .setSource(getInstance(), Uri.parse("check_point.glb"))
+            .setSource(getInstance(), Uri.parse("straight.glb"))
             .setIsFilamentGltf(true)
             .setAsyncLoadEnabled(true)
             .build()

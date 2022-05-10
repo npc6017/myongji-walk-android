@@ -16,14 +16,14 @@ class LocationModel {
     }
 
     //내 위치에서 원하는 위치로 갈 때 회전각 계산
-     fun getAngle(myLocation: Location, targetLocation: Location?): Double {
+     fun getAngle(myLocation: Location, targetLocation: Location): Double {
 
         //내 위치 위도 경도를 라디안으로 변환
         val myLat = myLocation.latitude * (3.141592 / 180)
         val myLng = myLocation.longitude * (3.141592 / 180)
 
         //타겟 위치 위도 경도를 라디안으로 변환
-        val targetLat = targetLocation!!.latitude * (3.141592 / 180)
+        val targetLat = targetLocation.latitude * (3.141592 / 180)
         val targetLng = targetLocation.longitude * (3.141592 / 180)
 
         //라디안 거리 계산
@@ -46,10 +46,10 @@ class LocationModel {
     }
 
     //두 위도 경도 주어지면 거리로 변환
-     fun getDistance(myLocation: Location?, targetLocation: Location?): Double {
+     fun getDistance(myLocation: Location, targetLocation: Location): Double {
         //위도 추출
-        val lat1 = myLocation!!.latitude
-        val lat2 = targetLocation!!.latitude
+        val lat1 = myLocation.latitude
+        val lat2 = targetLocation.latitude
 
         //경도 추출
         val lng1 = myLocation.longitude

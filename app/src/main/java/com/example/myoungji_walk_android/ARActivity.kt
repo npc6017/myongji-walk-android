@@ -1,7 +1,6 @@
 package com.example.myoungji_walk_android
 
 import android.Manifest
-import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -13,7 +12,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.KeyCharacterMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -60,15 +58,19 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
     private lateinit var arFragment: ArFragment
     private lateinit var arSceneView: ArSceneView
     private val node = Node()
-    private lateinit var targetLocation: Location
-    private lateinit var lastLocation: Location
-    private var angle = 0F // 북위각도
     lateinit var session: Session
     private lateinit var anchorNode: AnchorNode
-
     private lateinit var binding: FragmentArBinding
     private lateinit var locationModel: LocationModel
     private lateinit var modelRender: ModelRender
+
+    //거리, 각도변수
+    private lateinit var targetLocation: Location //사용자에게 가장 가까운 위치
+    private lateinit var lastLocation: Location //목적지
+    private var currentDistance: Double = 0.0 //사용자에게 가장 가까운 위치까지 거리
+    private var lastDistance: Double = 0.0 //목적지까지 거리
+    private var angle = 0F // 북위각도
+
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
@@ -145,8 +147,10 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         )
 
         //AR 화면 실행
+
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
         arSceneView = arFragment.arSceneView
+
 
         arSceneView.session = Session(this)
 
@@ -156,21 +160,18 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         config.lightEstimationMode = Config.LightEstimationMode.DISABLED
         arSceneView.session!!.configure(config)
 
+
+
         CoroutineScope(Dispatchers.Main).launch {
             while (true) {
                 distanceCal()
-                checkPointCal()
+                nearCheckPoint()
                 delay(1000)
             }
         }
 
         //naverMap
-        val fm = supportFragmentManager
-        val mapFragment = fm.findFragmentById(R.id.map_fragment) as MapFragment?
-            ?: MapFragment.newInstance().also {
-                fm.beginTransaction().add(R.id.map_fragment, it).commit()
-            }
-
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as MapFragment
         mapFragment.getMapAsync(this)
 
         arFragment.arSceneView.scene.addOnUpdateListener {
@@ -201,26 +202,27 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
-    private var currentDistance: Double = 0.0
-    private var lastDistance: Double = 0.0
-
     //가장 가까운 좌표와 다음 좌표의 거리 계산
     private fun distanceCal() {
+
+        //현재위치에서 가장 가까운 위,경도 Location 객체로 변환
         targetLocation =
             locationModel.coordToLocation(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+
+        //목적지 위,경도 Location 객체로 변환
         lastLocation = locationModel.coordToLocation(
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][0],
             gpsNodePointArrayList[gpsNodePointArrayList.size - 1][1]
         )
 
-        //target 위치와 현재 위치 간 각도 및 거리 계산
-        angle = locationModel.getAngle(mLocation, targetLocation).toFloat()
+        //targetLocation 과 현재 위치의 거리 계산
         currentDistance = locationModel.getDistance(
-            mLocation, locationModel.coordToLocation(
-                gpsNodePointArrayList[0][0],
-                gpsNodePointArrayList[0][1]
-            )
+            mLocation, targetLocation
         )
+
+        //targetLocation 과 현재 위치의 각도 계산
+        angle = locationModel.getAngle(mLocation, targetLocation).toFloat()
+
         lastDistance = locationModel.getDistance(mLocation, lastLocation)
         binding.angle.text = "angle : " + angle
         binding.checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
@@ -229,10 +231,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
     }
 
-    private fun checkPointCal() {
+    private fun nearCheckPoint() {
+        //gps 위치가 최신 정보인지 확인
         if(TimeUnit.NANOSECONDS.toSeconds(
                 SystemClock.elapsedRealtimeNanos()
-                    - mLocation.getElapsedRealtimeNanos())<100) {
+                    - mLocation.elapsedRealtimeNanos)<100) {
             //일정 거리 이상 가까이 오면 다음 체크포인트로
             if (currentDistance <= 4) {
                 gpsNodePointArrayList.removeAt(0)
@@ -268,7 +271,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 finish()
             }
         }else{
-                Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -310,6 +313,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         val quaternion1 = Quaternion.axisAngle(Vector3(0F, -1F, 0F), rotateAngle)
         transformableNode.worldRotation = quaternion1
+
         transformableNode.parent = anchorNode
         transformableNode.select()
         transformableNode.renderable = modelRender.arrowRender
@@ -318,8 +322,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         node.parent = transformableNode
         node.renderable = modelRender.checkPointRender
 
-        val newPosition = transformableNode.worldPosition
-        node.localPosition = (Vector3(newPosition.x+1F, newPosition.y+1F, newPosition.z+1F))
+        node.localPosition = Vector3(0F,1F,((currentDistance / 30) * -1).toFloat())
 
     }
 
@@ -367,6 +370,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
     }
 
     override fun onMapReady(naverMap: NaverMap) {
+
+
         val marker = Marker()
         marker.position = LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
         marker.map = naverMap
@@ -379,6 +384,9 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
             LatLng(gpsNodePointArrayList[3][0], gpsNodePointArrayList[3][1])
         )
         path.map = naverMap
+
+
+
     }
 }
 
