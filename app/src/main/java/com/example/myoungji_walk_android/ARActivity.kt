@@ -12,12 +12,14 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
@@ -160,8 +162,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         config.lightEstimationMode = Config.LightEstimationMode.DISABLED
         arSceneView.session!!.configure(config)
 
-
-
         CoroutineScope(Dispatchers.Main).launch {
             while (true) {
                 distanceCal()
@@ -179,6 +179,16 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 createAnchor()
             }
         }
+
+        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+
+        binding.button.setOnClickListener(View.OnClickListener {
+            if(bottomSheetBehavior.state==BottomSheetBehavior.STATE_COLLAPSED){
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }else{
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        })
     }
 
     //가속도, 자기장 센서 값 받아오기

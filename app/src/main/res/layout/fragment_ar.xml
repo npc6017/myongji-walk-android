@@ -14,7 +14,7 @@
             android:name="com.google.ar.sceneform.ux.ArFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="200dp" />
+            android:layout_marginBottom="150dp" />
 
 
         <LinearLayout
@@ -64,9 +64,10 @@
             android:descendantFocusability="blocksDescendants"
             android:focusableInTouchMode="true"
             android:orientation="vertical"
-            android:padding="10dp"
+            android:padding="0dp"
+            app:behavior_draggable="false"
             app:behavior_hideable="false"
-            app:behavior_peekHeight="200dp"
+            app:behavior_peekHeight="150dp"
             app:cardCornerRadius="0dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
@@ -75,6 +76,12 @@
                 android:name="com.naver.maps.map.MapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Button" />
 
         </androidx.cardview.widget.CardView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
