@@ -28,6 +28,7 @@ import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import com.gorisse.thomas.sceneform.util.getResourceUri
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
@@ -185,8 +186,10 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         binding.button.setOnClickListener(View.OnClickListener {
             if(bottomSheetBehavior.state==BottomSheetBehavior.STATE_COLLAPSED){
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                binding.button.setBackgroundResource(R.drawable.bar_down)
             }else{
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                binding.button.setBackgroundResource(R.drawable.bar_up)
             }
         })
     }
