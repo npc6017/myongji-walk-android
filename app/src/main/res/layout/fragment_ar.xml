@@ -30,6 +30,13 @@
                 android:gravity="center"
                 android:textColor="@android:color/holo_red_light"
                 android:textSize="20sp" />
+            <TextView
+                android:id="@+id/next_angle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@android:color/holo_red_light"
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/checkPoint"

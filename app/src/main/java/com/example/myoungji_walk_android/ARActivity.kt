@@ -73,6 +73,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
     private var currentDistance: Double = 0.0 //사용자에게 가장 가까운 위치까지 거리
     private var lastDistance: Double = 0.0 //목적지까지 거리
     private var angle = 0F // 북위각도
+    private var angleNext = 0F // 북위각도
 
 
     //위도 경도 형식으로 받아오는 배열값
@@ -236,8 +237,11 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         //targetLocation 과 현재 위치의 각도 계산
         angle = locationModel.getAngle(mLocation, targetLocation).toFloat()
 
+        angleNext = locationModel.getAngle(targetLocation, locationModel.coordToLocation(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])).toFloat()
+
         lastDistance = locationModel.getDistance(mLocation, lastLocation)
         binding.angle.text = "angle : " + angle
+        binding.nextAngle.text = "next_angle : " + angleNext
         binding.checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
         binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
         binding.now.text =
@@ -298,15 +302,14 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         for (plane: Plane in planes) {
             if (plane.trackingState == TrackingState.TRACKING) {
-                //센서를 통해서 평면 위치 계산후 방위각 계산
+
                 planePose = plane.centerPose
-                //내 위치를 화살표가 잘보이는 위치로 변경
+
                 val dPose = arFragment.arSceneView.arFrame!!.camera.displayOrientedPose
-                //평면의 Pose와 화면 계산
+
                 val tmpVec = floatArrayOf(dPose.tx(), planePose.ty(), dPose.tz())
                 tmpPose = Pose.makeTranslation(tmpVec)
 
-                //평면에 내가 바라보는 방향으로 Anchor 생성
                 if (this::anchorNode.isInitialized && anchorNode.anchor != null) {
                     anchorNode.anchor!!.detach()
                     Log.d("detach", "detach")
@@ -387,6 +390,7 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
 
         val marker = Marker()
         marker.position = LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
+        marker.position = LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])
         marker.map = naverMap
 
         val path = PathOverlay()
