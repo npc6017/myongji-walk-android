@@ -1,52 +1,52 @@
 package com.example.myoungji_walk_android
 
-import android.app.AlertDialog
-import android.content.Context
+
 import android.net.Uri
-import android.util.Log
+import com.example.myoungji_walk_android.ARActivity.Companion.getInstance
 import com.google.ar.sceneform.rendering.ModelRenderable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 
 class ModelRender {
-/*
-    fun a() {
-        //AR 이미지 초기화
-        val goal = ModelRenderable.builder()
-            .setSource(this, Uri.parse("check_point.glb"))
-            .setIsFilamentGltf(true)
-            .setAsyncLoadEnabled(true)
-            .build()
-        CompletableFuture.allOf(goal)
-            .handle<Any?>
-            { notUsed: Void?, throwable: Throwable? ->
-                if (throwable != null) {
-                    return@handle null
-                }
-                try {
-                    checkPointRender = goal.get()
-                } catch (e: InterruptedException) {
-                    e.getStackTrace()
-                } catch (e: ExecutionException) {
-                    e.getStackTrace()
-                }
-                null
-            }
-    }
+    lateinit var checkPointRender: ModelRenderable
+    lateinit var arrowRender: ModelRenderable
 
-    fun b() {
-        val goal2 = ModelRenderable.builder()
-            .setSource(this, Uri.parse("arrow.glb"))
+    fun checkPointModel() {
+        //AR 이미지 초기화
+        val render = ModelRenderable.builder()
+            .setSource(getInstance(), Uri.parse("straight.glb"))
             .setIsFilamentGltf(true)
             .setAsyncLoadEnabled(true)
             .build()
-        CompletableFuture.allOf(goal2)
+        CompletableFuture.allOf(render)
             .handle<Any?> { notUsed: Void?, throwable: Throwable? ->
                 if (throwable != null) {
                     return@handle null
                 }
                 try {
-                    arrowRender = goal2.get()
+                    checkPointRender = render.get()
+                } catch (e: InterruptedException) {
+                    e.getStackTrace()
+                } catch (e: ExecutionException) {
+                    e.getStackTrace()
+                }
+                null
+            }
+    }
+
+    fun arrowModel() {
+        val render = ModelRenderable.builder()
+            .setSource(getInstance(), Uri.parse("arrow.glb"))
+            .setIsFilamentGltf(true)
+            .setAsyncLoadEnabled(true)
+            .build()
+        CompletableFuture.allOf(render)
+            .handle<Any?> { notUsed: Void?, throwable: Throwable? ->
+                if (throwable != null) {
+                    return@handle null
+                }
+                try {
+                    arrowRender = render.get()
                 } catch (e: InterruptedException) {
                     e.stackTrace
                 } catch (e: ExecutionException) {
@@ -55,6 +55,4 @@ class ModelRender {
                 null
             }
     }
-
- */
 }

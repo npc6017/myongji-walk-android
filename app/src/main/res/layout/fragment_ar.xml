@@ -13,7 +13,8 @@
             android:id="@+id/arFragment"
             android:name="com.google.ar.sceneform.ux.ArFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginBottom="150dp" />
 
 
         <LinearLayout
@@ -24,6 +25,13 @@
 
             <TextView
                 android:id="@+id/angle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@android:color/holo_red_light"
+                android:textSize="20sp" />
+            <TextView
+                android:id="@+id/next_angle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -63,28 +71,28 @@
             android:descendantFocusability="blocksDescendants"
             android:focusableInTouchMode="true"
             android:orientation="vertical"
-            android:padding="10dp"
+            android:padding="0dp"
+            app:behavior_draggable="false"
             app:behavior_hideable="false"
-            app:behavior_peekHeight="100dp"
-            app:cardCornerRadius="50dp"
+            app:behavior_peekHeight="150dp"
+            app:cardCornerRadius="0dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-            <LinearLayout
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/map_fragment"
+                android:name="com.naver.maps.map.MapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="match_parent" />
 
-                <fragment
-                    android:id="@+id/map_fragment"
-                    android:name="com.naver.maps.map.MapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-            </LinearLayout>
-
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button"
+                style="@style/Style.Color.Button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center|top"
+                android:background="@drawable/bar_up"
+                tools:ignore="SpeakableTextPresentCheck" />
 
         </androidx.cardview.widget.CardView>
-
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
