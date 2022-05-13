@@ -176,12 +176,6 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as MapFragment
         mapFragment.getMapAsync(this)
 
-        arFragment.arSceneView.scene.addOnUpdateListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                createAnchor()
-            }
-        }
-
         val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
 
         binding.button.setOnClickListener(View.OnClickListener {
@@ -193,6 +187,12 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
                 binding.button.setBackgroundResource(R.drawable.bar_up)
             }
         })
+
+        arFragment.arSceneView.scene.addOnUpdateListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                createAnchor()
+            }
+        }
     }
 
     //가속도, 자기장 센서 값 받아오기
