@@ -7,6 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object ServiceGenerator {
+    //추후에 서버와 통신
     private const val BASE_URL = "https://run.mocky.io/"
     private val httpClient = OkHttpClient.Builder()
     private val builder = Retrofit.Builder()

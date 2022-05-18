@@ -49,7 +49,6 @@ class SearchPlaceActivity : AppCompatActivity() {
     private fun initSearchButton(){
         binding.searchButton.setOnClickListener {
             val placeText = binding.placeEditTextView.text.toString()
-            //todo 장소 검색
             retrofitService.searchLocation()
                 .enqueue(object: Callback<LocalDto> {
                     override fun onResponse(call: Call<LocalDto>, response: Response<LocalDto>) {
@@ -62,8 +61,6 @@ class SearchPlaceActivity : AppCompatActivity() {
                             val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
                             with(intent) {
                                 putExtra("data", data)
-                                //flag_acitivity_single_top -> 이미 생성된 메인액티비티를 그대로 사용할 수 있나?
-                                //setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                 startActivity(this)
                                 overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                             }

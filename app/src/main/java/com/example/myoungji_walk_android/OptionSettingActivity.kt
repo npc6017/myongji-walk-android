@@ -17,6 +17,8 @@ class OptionSettingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOptionSettingBinding
     private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java, PrefsHelper.read("token",""))
 
+    private val startId : Int = 0
+    private val destinationId : Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityOptionSettingBinding.inflate(layoutInflater)
@@ -70,7 +72,6 @@ class OptionSettingActivity : AppCompatActivity() {
                         }
                     }
                 }
-
                 override fun onFailure(call: Call<RouteDto>, t: Throwable) {
                     //실패
                 }
