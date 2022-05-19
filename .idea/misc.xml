@@ -3,6 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+<<<<<<< HEAD
+        <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.193" />
+        <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/drawable-v24/line.xml" value="0.194" />
+        <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/layout/checkpoint_distance.xml" value="0.18802083333333333" />
+        <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/layout/fragment_ar.xml" value="0.18489583333333334" />
+        <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.196" />
+=======
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/baseline_straight_24.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/baseline_turn_left_24.xml" value="0.158" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/baseline_turn_right_24.xml" value="0.158" />
@@ -40,6 +48,7 @@
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_history.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_local_cardview.xml" value="0.1484375" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_navigation.xml" value="0.1125" />
+>>>>>>> master
       </map>
     </option>
   </component>
