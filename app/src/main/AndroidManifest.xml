@@ -8,13 +8,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-
     <uses-feature
         android:name="android.hardware.camera.ar"
         android:required="true" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <application
         android:allowBackup="true"
@@ -23,7 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Myoungji_Walk_Android">
-        <!--
+
         <activity
             android:name=".JoinActivity"
             android:exported="false"
@@ -37,18 +35,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        -->
 
-        <activity
-
-            android:name=".ARActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <meta-data
             android:name="com.google.ar.core"
@@ -62,8 +49,13 @@
             android:name="com.naver.maps.map.CLIENT_ID"
             android:value="@string/naver_map_client_id" />
 
+
+        <activity
+            android:name=".ar.NavigationActivity"
+            android:exported="false"/>
+
         <service
-            android:name=".ARActivity"
+            android:name=".ar.NavigationActivity"
             android:foregroundServiceType="location" />
 
         <activity
@@ -79,9 +71,6 @@
         <activity
             android:name=".ConfirmPlaceActivity"
             android:noHistory="true" />
-        <activity
-            android:name=".NavigationActivity"
-            android:exported="false" />
         <activity
             android:name=".OptionSettingActivity"
             android:exported="false"

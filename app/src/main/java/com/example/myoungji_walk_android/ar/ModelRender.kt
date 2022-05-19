@@ -1,8 +1,8 @@
-package com.example.myoungji_walk_android
+package com.example.myoungji_walk_android.ar
 
 
 import android.net.Uri
-import com.example.myoungji_walk_android.ARActivity.Companion.getInstance
+import com.example.myoungji_walk_android.ar.NavigationActivity.Companion.getInstance
 import com.google.ar.sceneform.rendering.ModelRenderable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException

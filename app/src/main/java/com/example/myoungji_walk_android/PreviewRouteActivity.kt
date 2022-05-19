@@ -9,6 +9,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myoungji_walk_android.Adapter.NavigationListAdapter
 import com.example.myoungji_walk_android.Model.RouteDto
+import com.example.myoungji_walk_android.ar.NavigationActivity
 import com.example.myoungji_walk_android.databinding.ActivityPreviewRouteBinding
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate

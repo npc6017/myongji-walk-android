@@ -1,4 +1,4 @@
-package com.example.myoungji_walk_android
+package com.example.myoungji_walk_android.ar
 
 import android.location.Location
 import kotlin.math.acos

@@ -1,4 +1,4 @@
-package com.example.myoungji_walk_android
+package com.example.myoungji_walk_android.ar
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.example.myoungji_walk_android.R
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.ar.core.*
@@ -28,7 +29,6 @@ import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
-import com.gorisse.thomas.sceneform.util.getResourceUri
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback {
+class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback {
 
     //센서 변수
     private lateinit var mSensorManager: SensorManager
@@ -379,8 +379,8 @@ class ARActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback 
         //GPS 변수
         private val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10
 
-        private var instance:ARActivity? = null
-        fun getInstance(): ARActivity? {
+        private var instance: NavigationActivity? = null
+        fun getInstance(): NavigationActivity? {
             return instance
         }
     }
