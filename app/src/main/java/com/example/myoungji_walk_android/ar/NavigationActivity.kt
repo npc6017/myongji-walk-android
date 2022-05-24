@@ -2,6 +2,7 @@ package com.example.myoungji_walk_android.ar
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -34,7 +35,7 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
-import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.coroutines.CoroutineScope
@@ -415,7 +416,12 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
          */
 
         val path = PathOverlay()
-        path.width = 20
+        path.width = 30
+        path.patternImage = OverlayImage.fromResource(R.drawable.arrow_path)
+        path.patternInterval = 60
+        path.outlineWidth = 5
+        path.color = Color.parseColor("#00AAFF")
+
         path.coords = listOf(
             LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1]),
             LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1]),
