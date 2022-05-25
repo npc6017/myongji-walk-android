@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.myoungji_walk_android.MainRouteSearchActivity
 import com.example.myoungji_walk_android.SearchPlaceActivity
+import com.example.myoungji_walk_android.ar.NavigationActivity
 import com.example.myoungji_walk_android.databinding.FragmentMapBinding
 
 class MapFragment : Fragment() {
@@ -17,10 +18,15 @@ class MapFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentMapBinding.inflate(inflater, container, false)
         initInputPlaceButton()
         initFindPlaceButton()
+        //ar 테스트용 진입버튼
+        binding.gotoAr.setOnClickListener {
+            val intent = Intent(requireContext(), NavigationActivity::class.java)
+            startActivity(intent)
+        }
         return binding.root
     }
 

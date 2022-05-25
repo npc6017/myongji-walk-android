@@ -2,6 +2,7 @@ package com.example.myoungji_walk_android
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
@@ -53,16 +54,18 @@ class SearchPlaceActivity : AppCompatActivity() {
                 .enqueue(object: Callback<LocalDto> {
                     override fun onResponse(call: Call<LocalDto>, response: Response<LocalDto>) {
                         if(response.isSuccessful.not()) {
+                            Log.d("not ok", "not oK")
                             return
                         }
                         response.body()?.let {
+                            Log.d("ok", "oK")
                             val data = LocalDto(it.place, it.location)
-                            saveSearchKeyword(placeText)
+                            //saveSearchKeyword(placeText)
                             val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
                             with(intent) {
                                 putExtra("data", data)
                                 startActivity(this)
-                                overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                                //overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                             }
                         }
                     }

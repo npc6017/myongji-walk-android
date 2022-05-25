@@ -2,6 +2,7 @@ package com.example.myoungji_walk_android.ar
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -30,11 +31,13 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
-import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
+import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -74,6 +77,10 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
     private var lastDistance: Double = 0.0 //목적지까지 거리
     private var angle = 0F // 북위각도
     private var angleNext = 0F // 북위각도
+
+    //naver map
+    private lateinit var locationSource: FusedLocationSource
+    private lateinit var naverMap: NaverMap
 
 
     //위도 경도 형식으로 받아오는 배열값
@@ -142,6 +149,10 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
             mLocation = Location("myLoc")
         }
 
+        //FusedLocationSource 추가
+        locationSource =
+            FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+
         checkPermission()
         locationManager.requestLocationUpdates(
             LocationManager.GPS_PROVIDER,
@@ -154,7 +165,6 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
         arSceneView = arFragment.arSceneView
-
 
         arSceneView.session = Session(this)
 
@@ -378,6 +388,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
     companion object {
         //GPS 변수
         private val MY_PERMISSIONS_REQUEST_READ_CONTACTS = 10
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
 
         private var instance: NavigationActivity? = null
         fun getInstance(): NavigationActivity? {
@@ -386,14 +397,31 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
     }
 
     override fun onMapReady(naverMap: NaverMap) {
+        naverMap.isLiteModeEnabled = true
+        naverMap.locationSource = locationSource
+        naverMap.uiSettings.isLocationButtonEnabled = true
+        naverMap.locationTrackingMode = LocationTrackingMode.Face
 
+        naverMap.addOnLocationChangeListener { location ->
+            Toast.makeText(this, "${location.latitude}, ${location.longitude}",
+                Toast.LENGTH_SHORT).show()
+        }
 
+        /*
         val marker = Marker()
         marker.position = LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
         marker.position = LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])
         marker.map = naverMap
 
+         */
+
         val path = PathOverlay()
+        path.width = 30
+        path.patternImage = OverlayImage.fromResource(R.drawable.arrow_path)
+        path.patternInterval = 60
+        path.outlineWidth = 5
+        path.color = Color.parseColor("#00AAFF")
+
         path.coords = listOf(
             LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1]),
             LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1]),
