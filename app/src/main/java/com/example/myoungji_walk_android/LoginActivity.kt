@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.myoungji_walk_android.Model.User
+import com.example.myoungji_walk_android.Model.AccountInfo
+import com.example.myoungji_walk_android.Model.Token
 import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
 import com.example.myoungji_walk_android.data.PrefsHelper
@@ -28,32 +30,43 @@ class LoginActivity : AppCompatActivity() {
         PrefsHelper.init(applicationContext)
     }
 
-    private fun getTokenAPI() {
-        nonTokenService.loginService()
-            .enqueue(object : Callback<User> {
+    private fun getTokenAPI(email: String, password: String) {
+        nonTokenService.loginService(AccountInfo(email, password))
+            .enqueue(object : Callback<Token> {
                 override fun onResponse(
-                    call: Call<User>,
-                    response: Response<User>
+                    call: Call<Token>,
+                    response: Response<Token>
                 ) {
                     //성공
                     if (response.isSuccessful.not()) {
-                        //실패 처리에 대한 구현
+                        Toast.makeText(this@LoginActivity, "정보가 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
                         return
                     }
-                    val token = response.headers().get("Authorization")
-                    retrofitService = ServiceGenerator.createService(RetrofitService::class.java, token)
-                    response.body()?.let {
-                        //Log.d("LoginActivity", it.name)
-                        PrefsHelper.write("token", token)
-                        PrefsHelper.write("email", it.email)
-                        PrefsHelper.write("name", it.name)
-                        PrefsHelper.write("grade", it.grade)
+                    response.body().let {
+                        val accessToken = it?.accessToken
+                        Log.d("LoginActivity::accessToken", accessToken.toString())
+                        PrefsHelper.write("accessToken", accessToken)
+                        retrofitService = ServiceGenerator.createService(RetrofitService::class.java, accessToken)
                     }
-                    Log.d("LoginActivity", response.code().toString())
+                    when(response.code()){
+                        200 -> {
+                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            with(intent) {
+                                startActivity(this)
+                                overridePendingTransition(
+                                    androidx.appcompat.R.anim.abc_fade_in,
+                                    androidx.appcompat.R.anim.abc_fade_out
+                                )
+                            }
+                        }
+                        else -> {
+                            Toast.makeText(this@LoginActivity, "정보가 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
                 }
 
-                override fun onFailure(call: Call<User>, t: Throwable) {
+                override fun onFailure(call: Call<Token>, t: Throwable) {
                     //실패
                 }
             })
@@ -78,15 +91,9 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
                 binding.loginButton.id -> {
-                    getTokenAPI()
-                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                    with(intent) {
-                        startActivity(this)
-                        overridePendingTransition(
-                            androidx.appcompat.R.anim.abc_fade_in,
-                            androidx.appcompat.R.anim.abc_fade_out
-                        )
-                    }
+                    val email = binding.EmailEditText.text.toString()
+                    val password = binding.passwordEditText.text.toString()
+                    getTokenAPI(email, password)
                 }
             }
         }

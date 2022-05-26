@@ -39,7 +39,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
         ).build()
 
         data = intent.getSerializableExtra("data") as LocalDto
-        title = data.place
+        title = data.name
         binding.mapView.getMapAsync(this)
 
         initButton()
@@ -109,18 +109,18 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     }
 
     private fun initLocalCardView(data : LocalDto){
-        initBookMarkButton(data.place)
-        binding.cardViewLayout.title.text = data.place
+        initBookMarkButton(data.name)
+        binding.cardViewLayout.title.text = data.name
     }
 
     override fun onMapReady(map: NaverMap) {
         naverMap = map
         naverMap.minZoom = 10.0
         naverMap.maxZoom = 18.0
-        val cameraUpdate = CameraUpdate.scrollTo(LatLng(data.location[0], data.location[1]))
+        val cameraUpdate = CameraUpdate.scrollTo(LatLng(data.latitude.toDouble(), data.longitude.toDouble()))
         naverMap.moveCamera(cameraUpdate)
         val marker = Marker()
-        marker.position = LatLng(data.location[0], data.location[1])
+        marker.position = LatLng(data.latitude.toDouble(), data.longitude.toDouble())
         marker.map = naverMap
     }
 
