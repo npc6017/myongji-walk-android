@@ -18,7 +18,6 @@ import retrofit2.Response
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityLoginBinding
-    var retrofitService: RetrofitService? = null
     val nonTokenService = ServiceGenerator.createService(RetrofitService::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,5 +90,9 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object{
+        var retrofitService: RetrofitService? = null
     }
 }

@@ -15,8 +15,7 @@ import retrofit2.Response
 
 class OptionSettingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOptionSettingBinding
-    private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java, PrefsHelper.read("token",""))
-
+    private val retrofitService = ServiceGenerator.createService(RetrofitService::class.java)
     private val startId : Int = 0
     private val destinationId : Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {

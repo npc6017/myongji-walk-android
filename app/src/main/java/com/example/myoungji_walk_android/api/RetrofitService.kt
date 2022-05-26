@@ -9,6 +9,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.Header
+import retrofit2.http.POST
 
 interface RetrofitService {
     //todo 추후에 서버통신
@@ -33,11 +34,22 @@ interface RetrofitService {
     ): Call<User>
 
     //이메일, 비밀번호, 학년, 이름
-    @GET("")
+    @GET("/account")
     fun joinService(
 //        @Query("email") email: String,
 //        @Query("password") password: String,
 //        @Query("name") name: String,
 //        @Query("grade") grade: Int
+    ): Call<ResponseBody>
+
+    @POST("/account/valid")
+    fun certificationStudent(
+        @Query("email") email : String
+    ): Call<ResponseBody>
+
+    @POST("/account/code")
+    fun certificationNumber(
+        @Query("email") email : String,
+        @Query("code") code : Int
     ): Call<ResponseBody>
 }
