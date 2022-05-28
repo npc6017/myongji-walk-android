@@ -2,18 +2,13 @@ package com.example.myoungji_walk_android
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.TextView
-import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.example.myoungji_walk_android.Model.BookMark
-import com.example.myoungji_walk_android.Model.History
-import com.example.myoungji_walk_android.Model.LocalDto
+import com.example.myoungji_walk_android.Model.nodeDto
 import com.example.myoungji_walk_android.databinding.ActivityConfirmplaceBinding
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.geometry.Tm128
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
@@ -25,7 +20,8 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
     private lateinit var db: AppDataBaseBookMark
     private lateinit var naverMap: NaverMap
     private var title : String = ""
-    private lateinit var data : LocalDto
+    private var id : Int = 0
+    private lateinit var data : nodeDto
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +34,8 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
             "BookMarkDB"
         ).build()
 
-        data = intent.getSerializableExtra("data") as LocalDto
+        data = intent.getSerializableExtra("data") as nodeDto
+        id = data.id
         title = data.name
         binding.mapView.getMapAsync(this)
 
@@ -54,6 +51,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                 binding.cardViewLayout.startingPointButton.id -> {
                     val intent = Intent(this@ConfirmPlaceActivity, MainRouteSearchActivity::class.java)
                     with(intent) {
+                        putExtra("id", id)
                         putExtra("title", title)
                         putExtra("divisionLocal", 101)
                         startActivity(intent)
@@ -63,6 +61,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                 binding.cardViewLayout.destinationButton.id -> {
                     val intent = Intent(this@ConfirmPlaceActivity, MainRouteSearchActivity::class.java)
                     with(intent) {
+                        putExtra("id", id)
                         putExtra("title", title)
                         putExtra("divisionLocal", 102)
                         startActivity(intent)
@@ -108,7 +107,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
         binding.cardViewLayout.bookMarkCheckBox.setOnClickListener(buttonListener())
     }
 
-    private fun initLocalCardView(data : LocalDto){
+    private fun initLocalCardView(data : nodeDto){
         initBookMarkButton(data.name)
         binding.cardViewLayout.title.text = data.name
     }

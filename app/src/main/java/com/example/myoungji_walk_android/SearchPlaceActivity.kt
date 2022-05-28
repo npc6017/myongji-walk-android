@@ -7,9 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.example.myoungji_walk_android.Adapter.HistoryAdapter
-import com.example.myoungji_walk_android.LoginActivity.Companion.retrofitService
 import com.example.myoungji_walk_android.Model.History
-import com.example.myoungji_walk_android.Model.LocalDto
+import com.example.myoungji_walk_android.Model.nodeDto
 import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
 import com.example.myoungji_walk_android.databinding.ActivitySearchplaceBinding
@@ -51,8 +50,8 @@ class SearchPlaceActivity : AppCompatActivity() {
         binding.searchButton.setOnClickListener {
             val placeText = binding.placeEditTextView.text.toString()
             retrofitService1.searchLocation(placeText)
-                .enqueue(object: Callback<LocalDto> {
-                    override fun onResponse(call: Call<LocalDto>, response: Response<LocalDto>) {
+                .enqueue(object: Callback<nodeDto> {
+                    override fun onResponse(call: Call<nodeDto>, response: Response<nodeDto>) {
                         if(response.isSuccessful.not()) {
                             Log.d("not ok", "not oK")
                             Log.d("SearchPlaceActivity::respneseCode", response.code().toString())
@@ -61,9 +60,9 @@ class SearchPlaceActivity : AppCompatActivity() {
                         }
                         response.body()?.let {
                             Log.d("ok", "oK")
-                            val data = LocalDto(it.latitude, it.longitude, it.name)
+                            val data = nodeDto(it.id, it.latitude, it.longitude, it.name)
                             //saveSearchKeyword(placeText)
-                            Log.d("SearchPlaceActivity::respneseCode", response.code().toString())
+                            Log.d("SearchPlaceActivity::responseCode", response.code().toString())
                             val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
                             with(intent) {
                                 putExtra("data", data)
@@ -72,7 +71,7 @@ class SearchPlaceActivity : AppCompatActivity() {
                             }
                         }
                     }
-                    override fun onFailure(call: Call<LocalDto>, t: Throwable) {
+                    override fun onFailure(call: Call<nodeDto>, t: Throwable) {
                         TODO("Not yet implemented")
                     }
                 })

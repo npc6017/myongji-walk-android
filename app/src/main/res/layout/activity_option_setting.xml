@@ -37,41 +37,27 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/optionShortestButton"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/btn_ripple_effect_light_blue"
-            android:gravity="center"
-            android:text="가장 빠른길로 안내\n\n목적지까지 최단거리로 안내합니다."
-            android:textColor="@color/black"
-            android:textIsSelectable="false"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/optionSafetyButton"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/btn_ripple_effect_light_blue"
-            android:gravity="center"
-            android:text="밤이 안전한 길\n\n가로등이 밝은 경로로 안내합니다."
-            android:textColor="@color/black"
-            android:textIsSelectable="false"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/optionNoHillButton"
+            android:id="@+id/optionLowHillButton"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/btn_ripple_effect_light_blue"
             android:gravity="center"
             android:text="언덕없는 완만한\n\n경사로가 가장 낮은 경로로 안내합니다."
+            android:textColor="@color/black"
+            android:textIsSelectable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/optionLowRainButton"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/btn_ripple_effect_light_blue"
+            android:gravity="center"
+            android:text="비를 피할 수 있는\n\n비를 피할 수 있는 경로로 안내합니다."
             android:textColor="@color/black"
             android:textIsSelectable="false"
             android:textSize="20sp"
@@ -86,6 +72,20 @@
             android:background="@drawable/btn_ripple_effect_light_blue"
             android:gravity="center"
             android:text="계단없는 경로\n\n계단이 없는 경로로 설정합니다."
+            android:textColor="@color/black"
+            android:textIsSelectable="false"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/optionSafetyButton"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/btn_ripple_effect_light_blue"
+            android:gravity="center"
+            android:text="밤이 안전한 길\n\n가로등이 밝은 경로로 안내합니다."
             android:textColor="@color/black"
             android:textIsSelectable="false"
             android:textSize="20sp"

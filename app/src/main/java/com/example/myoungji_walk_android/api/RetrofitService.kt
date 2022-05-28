@@ -8,14 +8,14 @@ interface RetrofitService {
     @GET("/node")
     fun searchLocation(
         @Query("name") name: String
-    ): Call<LocalDto>
+    ): Call<nodeDto>
 
-    @GET("/v3/ca5bf253-9638-4798-801b-2dd1fb6f13fe")
+    @GET("/map/pathFind")
     fun priviewRoute(
-//        @Query("start") start: Int,
-//        @Query("destination") destination: Int,
-//        @Query("option") option: Int
-    ): Call<RouteDto>
+        @Query("start") start: Int,
+        @Query("end") end: Int,
+        @Query("weightCode") weightCode: String
+    ): Call<pathFindDto>
 
     //이메일, 비밀번호 전송
     @POST("/account/signIn")

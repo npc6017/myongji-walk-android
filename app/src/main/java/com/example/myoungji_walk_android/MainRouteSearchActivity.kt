@@ -81,17 +81,24 @@ class MainRouteSearchActivity : AppCompatActivity() {
 
     private fun initOptionSettingButton(){
         binding.optionSettingButton.setOnClickListener {
-            startActivity(Intent(this, OptionSettingActivity::class.java))
-            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+            val intent = Intent(this, OptionSettingActivity::class.java)
+            with(intent) {
+                putExtra("start", startId)
+                putExtra("end", endId)
+                startActivity(this)
+                overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+            }
         }
     }
 
     private fun initText(){
         if(divisionLocal == 101){
             startTitle = intent?.getStringExtra("title").toString()
+            startId = intent?.getIntExtra("id", 0)!!
         }
         if(divisionLocal == 102){
             destinationTitle = intent?.getStringExtra("title").toString()
+            endId = intent?.getIntExtra("id", 0)!!
         }
         binding.startInputButton.text = startTitle
         binding.destinationInputButton.text = destinationTitle
@@ -100,5 +107,7 @@ class MainRouteSearchActivity : AppCompatActivity() {
     companion object {
         var startTitle : String = "장소를 입력하세요."
         var destinationTitle : String = "장소를 입력하세요."
+        var startId : Int = 0
+        var endId : Int = 0
     }
 }
