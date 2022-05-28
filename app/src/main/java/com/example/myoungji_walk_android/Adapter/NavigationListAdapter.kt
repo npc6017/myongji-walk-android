@@ -19,15 +19,15 @@ class NavigationListAdapter: ListAdapter<Guide, NavigationListAdapter.ItemViewHo
             val distanceItemTextView = view.findViewById<TextView>(R.id.distanceItemTextView)
             val arrowImageView = view.findViewById<ImageView>(R.id.arrowImageView)
             when(guide.type){
-                1 -> {
+                "직진" -> {
                     arrowTextView.text = "직진"
                     arrowImageView.setImageResource(R.drawable.baseline_straight_24)
                 }
-                2 -> {
+                "왼쪽" -> {
                     arrowTextView.text = "왼쪽 방향"
                     arrowImageView.setImageResource(R.drawable.baseline_turn_left_24)
                 }
-                3 -> {
+                "오른쪽" -> {
                     arrowTextView.text = "오른쪽 방향"
                     arrowImageView.setImageResource(R.drawable.baseline_turn_right_24)
                 }
