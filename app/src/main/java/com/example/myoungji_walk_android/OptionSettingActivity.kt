@@ -8,6 +8,7 @@ import android.view.View
 import com.example.myoungji_walk_android.Model.pathFindDto
 import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivityOptionSettingBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -58,7 +59,8 @@ class OptionSettingActivity : AppCompatActivity() {
 
 
     private fun getListFromAPI(weightCode : String) {
-        retrofitService.priviewRoute(start, end, weightCode)
+        val accessToken = PrefsHelper.read("accessToken", "")
+        retrofitService.priviewRoute("Bearer $accessToken", start, end, weightCode)
             .enqueue(object : Callback<pathFindDto> {
                 override fun onResponse(
                     call: Call<pathFindDto>,

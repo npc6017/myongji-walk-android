@@ -3,6 +3,7 @@ package com.example.myoungji_walk_android
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -10,6 +11,7 @@ import com.example.myoungji_walk_android.Adapter.ViewPageAdapter
 import com.example.myoungji_walk_android.Fragment.BestPlaceFragment
 import com.example.myoungji_walk_android.Fragment.MapFragment
 import com.example.myoungji_walk_android.Fragment.SettingFragment
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 

@@ -11,6 +11,7 @@ import com.example.myoungji_walk_android.Model.History
 import com.example.myoungji_walk_android.Model.nodeDto
 import com.example.myoungji_walk_android.api.RetrofitService
 import com.example.myoungji_walk_android.api.ServiceGenerator
+import com.example.myoungji_walk_android.data.PrefsHelper
 import com.example.myoungji_walk_android.databinding.ActivitySearchplaceBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -48,8 +49,9 @@ class SearchPlaceActivity : AppCompatActivity() {
 
     private fun initSearchButton(){
         binding.searchButton.setOnClickListener {
+            val accessToken = PrefsHelper.read("accessToken", "")
             val placeText = binding.placeEditTextView.text.toString()
-            retrofitService1.searchLocation(placeText)
+            retrofitService1.searchLocation("Bearer $accessToken", placeText)
                 .enqueue(object: Callback<nodeDto> {
                     override fun onResponse(call: Call<nodeDto>, response: Response<nodeDto>) {
                         if(response.isSuccessful.not()) {

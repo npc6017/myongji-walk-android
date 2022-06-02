@@ -46,7 +46,7 @@ class LoginActivity : AppCompatActivity() {
                         val accessToken = it?.accessToken
                         Log.d("LoginActivity::accessToken", accessToken.toString())
                         PrefsHelper.write("accessToken", accessToken)
-                        retrofitService = ServiceGenerator.createService(RetrofitService::class.java, accessToken)
+                        //retrofitService = ServiceGenerator.createService(RetrofitService::class.java, accessToken)
                     }
                     when(response.code()){
                         200 -> {
@@ -100,6 +100,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object{
-        var retrofitService: RetrofitService? = null
+        //var retrofitService: RetrofitService? = null
     }
 }

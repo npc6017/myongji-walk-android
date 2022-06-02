@@ -15,6 +15,7 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.MarkerIcons
 
@@ -115,9 +116,13 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun getRoute(){
         //polyline.map = naverMap
         //polyline.coords = coord
+
+        path.width = 30
+        path.patternImage = OverlayImage.fromResource(R.drawable.arrow_path)
+        path.patternInterval = 60
+        path.outlineWidth = 5
+        path.color = Color.parseColor("#00AAFF")
         path.coords = coord
-        path.color = Color.BLUE
-        path.width = 10
         path.map = naverMap
     }
 
