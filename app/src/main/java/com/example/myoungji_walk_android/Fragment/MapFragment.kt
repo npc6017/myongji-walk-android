@@ -10,10 +10,16 @@ import com.example.myoungji_walk_android.MainRouteSearchActivity
 import com.example.myoungji_walk_android.SearchPlaceActivity
 import com.example.myoungji_walk_android.ar.NavigationActivity
 import com.example.myoungji_walk_android.databinding.FragmentMapBinding
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraUpdate
+import com.naver.maps.map.NaverMap
+import com.naver.maps.map.OnMapReadyCallback
 
-class MapFragment : Fragment() {
+class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var binding : FragmentMapBinding
+    private lateinit var naverMap: NaverMap
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -27,6 +33,8 @@ class MapFragment : Fragment() {
             val intent = Intent(requireContext(), NavigationActivity::class.java)
             startActivity(intent)
         }
+        binding.mapView.onCreate(savedInstanceState)
+        binding.mapView.getMapAsync(this)
         return binding.root
     }
 
@@ -79,5 +87,13 @@ class MapFragment : Fragment() {
     override fun onLowMemory() {
         super.onLowMemory()
         binding.mapView.onLowMemory()
+    }
+
+    override fun onMapReady(map: NaverMap) {
+        naverMap = map
+        naverMap.minZoom = 10.0
+        naverMap.maxZoom = 18.0
+        val cameraUpdate = CameraUpdate.scrollTo(LatLng(37.221761383374904,127.18567641896878))
+        naverMap.moveCamera(cameraUpdate)
     }
 }

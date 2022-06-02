@@ -4,11 +4,10 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myoungji_walk_android.Adapter.NavigationListAdapter
-import com.example.myoungji_walk_android.Model.RouteDto
+import com.example.myoungji_walk_android.Model.pathFindDto
 import com.example.myoungji_walk_android.ar.NavigationActivity
 import com.example.myoungji_walk_android.databinding.ActivityPreviewRouteBinding
 import com.naver.maps.geometry.LatLng
@@ -18,7 +17,6 @@ import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
-import com.naver.maps.map.overlay.PolylineOverlay
 import com.naver.maps.map.util.MarkerIcons
 
 class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -28,8 +26,8 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var coord = mutableListOf<LatLng>()
     private val path = PathOverlay()
-    private lateinit var route : RouteDto
-    private var option : Int = 0
+    private lateinit var route : pathFindDto
+    private var option : String = ""
 
     private val recyclerViewAdapter = NavigationListAdapter()
 
@@ -39,8 +37,8 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
         binding.mapView.getMapAsync(this)
 
-        route = intent.getSerializableExtra("route") as RouteDto
-        option = intent.getIntExtra("option", 0)
+        route = intent.getSerializableExtra("route") as pathFindDto
+        option = intent.getStringExtra("weightCode")!!
         getList()
         initButton()
         initData()
@@ -55,10 +53,10 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.cardViewLayout.detailButton.id -> {
                     binding.bottomSheetLayout.root.visibility = View.VISIBLE
                     when(option){
-                        1 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "가장 빠른"
-                        2 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "안전한"
-                        3 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "완만한"
-                        4 -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "계단 없는"
+                        "LOW_HILL" -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "완만한"
+                        "LOW_RAIN" -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "비를 피할 수 있는"
+                        "LOW_STAIR" -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "계단 없는"
+                        "STREET_LAMP" -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "안전한"
                     }
                     binding.cardViewLayout.root.visibility = View.GONE
                 }
@@ -95,13 +93,13 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun getList(){
         route.items.forEach {
-            coord.add(LatLng(it.lat, it.lng))
+            coord.add(LatLng(it.latitude.toDouble(), it.longitude.toDouble()))
         }
     }
 
     private fun upStartMarker(){
         val marker = Marker()
-        marker.position = LatLng(route.start.location[0], route.start.location[1])
+        marker.position = LatLng(route.start.latitude.toDouble(), route.start.longitude.toDouble())
         marker.map = naverMap
         marker.icon = MarkerIcons.BLACK
         marker.iconTintColor = Color.RED
@@ -109,7 +107,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun upGoalMarker(){
         val marker = Marker()
-        marker.position = LatLng(route.goal.location[0], route.goal.location[1])
+        marker.position = LatLng(route.goal.latitude.toDouble(), route.goal.longitude.toDouble())
         marker.map = naverMap
         marker.icon = MarkerIcons.BLACK
         marker.iconTintColor = Color.RED
@@ -118,9 +116,13 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun getRoute(){
         //polyline.map = naverMap
         //polyline.coords = coord
+
+        path.width = 30
+        path.patternImage = OverlayImage.fromResource(R.drawable.arrow_path)
+        path.patternInterval = 60
+        path.outlineWidth = 5
+        path.color = Color.parseColor("#00AAFF")
         path.coords = coord
-        path.color = Color.BLUE
-        path.width = 10
         path.map = naverMap
     }
 
@@ -164,7 +166,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         naverMap.minZoom = 10.0
         naverMap.maxZoom = 18.0
 
-        val cameraUpdate = CameraUpdate.scrollTo(LatLng(route.start.location[0], route.start.location[1]))
+        val cameraUpdate = CameraUpdate.scrollTo(LatLng(route.start.latitude.toDouble(), route.start.longitude.toDouble()))
         naverMap.moveCamera(cameraUpdate)
         getRoute()
         upStartMarker()
