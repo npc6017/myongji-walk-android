@@ -85,6 +85,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             recyclerViewAdapter.submitList(it.guide)
         }
     }
+
     private fun initButton(){
         binding.cardViewLayout.detailButton.setOnClickListener(buttonListener())
         binding.cardViewLayout.guideButton.setOnClickListener(buttonListener())

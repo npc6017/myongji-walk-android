@@ -129,7 +129,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         locationModel = LocationModel()
         modelRender = ModelRender()
 
-        modelRender.checkPointModel()
+        modelRender.straightModel()
         modelRender.arrowModel()
 
         //tast checkpoint. 추후 서버에서 받아올 수 있도록
