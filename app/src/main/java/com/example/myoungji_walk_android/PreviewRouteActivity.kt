@@ -65,6 +65,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     with(intent) {
                         //todo 경로전달
                         startActivity(intent)
+                        intent.putExtra("route", route)
                         overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }
@@ -73,6 +74,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     with(intent) {
                         //todo 경로전달
                         startActivity(intent)
+                        intent.putExtra("route", route)
                         overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }

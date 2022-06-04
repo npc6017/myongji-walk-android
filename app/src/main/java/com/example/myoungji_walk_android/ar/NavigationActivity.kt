@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.example.myoungji_walk_android.Model.pathFindDto
 import com.example.myoungji_walk_android.R
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -85,17 +86,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
-
-    /**hide this**/
-    private val gpsNodePoint = arrayOf(
-        doubleArrayOf(37.64450, 126.69155),
-        doubleArrayOf(37.64447, 126.69070),
-        doubleArrayOf(37.64442, 126.68899),
-        doubleArrayOf(37.64452, 126.68715),
-        doubleArrayOf(37.64485, 126.68586),
-        doubleArrayOf(37.64489, 126.68569)
-
-    )
+    private lateinit var route : pathFindDto
 
     //권한 체크
     private fun checkPermission() {
@@ -122,18 +113,33 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         override fun onProviderDisabled(provider: String) {}
     }
 
+    private fun initCoord(){
+        route = intent.getSerializableExtra("route") as pathFindDto
+
+        val tempCoord = Array(route.items.size) { DoubleArray(2) { 1.0 } }
+        for(i in route.items.indices) {
+            tempCoord[i][0] = route.items[i].latitude.toDouble()
+            tempCoord[i][1] = route.items[i].longitude.toDouble()
+        }
+        gpsNodePointArrayList.addAll(listOf(*tempCoord))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.fragment_ar)
+
+        try {
+            initCoord()
+        }catch (e: Exception) {
+            Toast.makeText(this, "경로생성중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
 
         locationModel = LocationModel()
         modelRender = ModelRender()
 
         modelRender.straightModel()
         modelRender.arrowModel()
-
-        //tast checkpoint. 추후 서버에서 받아올 수 있도록
-        gpsNodePointArrayList.addAll(listOf(*gpsNodePoint))
 
         //센서 초기화
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -162,7 +168,6 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         )
 
         //AR 화면 실행
-
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
         arSceneView = arFragment.arSceneView
 
@@ -250,12 +255,15 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         angleNext = locationModel.getAngle(targetLocation, locationModel.coordToLocation(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])).toFloat()
 
         lastDistance = locationModel.getDistance(mLocation, lastLocation)
+        /*
         binding.angle.text = "angle : " + angle
         binding.nextAngle.text = "next_angle : " + angleNext
         binding.checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
         binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
         binding.now.text =
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
+
+         */
     }
 
     private fun nearCheckPoint() {
@@ -434,7 +442,6 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
     }
 }
-
 
 
 
