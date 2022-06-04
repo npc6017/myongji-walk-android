@@ -36,6 +36,7 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
@@ -405,7 +406,8 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
     }
 
     override fun onMapReady(naverMap: NaverMap) {
-        naverMap.isLiteModeEnabled = true
+        val coord = mutableListOf<LatLng>()
+        //naverMap.isLiteModeEnabled = true
         naverMap.locationSource = locationSource
         naverMap.uiSettings.isLocationButtonEnabled = true
         naverMap.locationTrackingMode = LocationTrackingMode.Face
@@ -415,13 +417,11 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
                 Toast.LENGTH_SHORT).show()
         }
 
-        /*
         val marker = Marker()
-        marker.position = LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
-        marker.position = LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])
+        route.items.forEach {
+            marker.position = LatLng(it.latitude.toDouble(), it.longitude.toDouble())
+        }
         marker.map = naverMap
-
-         */
 
         val path = PathOverlay()
         path.width = 30
@@ -430,16 +430,13 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         path.outlineWidth = 5
         path.color = Color.parseColor("#00AAFF")
 
-        path.coords = listOf(
-            LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1]),
-            LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1]),
-            LatLng(gpsNodePointArrayList[2][0], gpsNodePointArrayList[2][1]),
-            LatLng(gpsNodePointArrayList[3][0], gpsNodePointArrayList[3][1])
-        )
+        route.items.forEach {
+            coord.add(LatLng(it.latitude.toDouble(), it.longitude.toDouble()))
+        }
+
+        path.coords = coord
+
         path.map = naverMap
-
-
-
     }
 }
 
