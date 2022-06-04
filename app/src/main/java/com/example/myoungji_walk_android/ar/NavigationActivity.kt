@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.example.myoungji_walk_android.Model.Guide
 import com.example.myoungji_walk_android.Model.pathFindDto
 import com.example.myoungji_walk_android.R
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
@@ -87,6 +88,9 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
+    //위치값
+    var guide = ArrayList<Guide>()
+
     private lateinit var route : pathFindDto
 
     //권한 체크
@@ -114,8 +118,12 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         override fun onProviderDisabled(provider: String) {}
     }
 
-    private fun initCoord(){
+    private fun initData(){
         route = intent.getSerializableExtra("route") as pathFindDto
+
+        route.let {
+            guide = it.guide as ArrayList<Guide>
+        }
 
         val tempCoord = Array(route.items.size) { DoubleArray(2) { 1.0 } }
         for(i in route.items.indices) {
@@ -130,7 +138,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         binding = DataBindingUtil.setContentView(this, R.layout.fragment_ar)
 
         try {
-            initCoord()
+            initData()
         }catch (e: Exception) {
             Toast.makeText(this, "경로생성중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             finish()
@@ -140,6 +148,9 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         modelRender = ModelRender()
 
         modelRender.straightModel()
+        modelRender.leftModel()
+        modelRender.rightModel()
+
         modelRender.arrowModel()
 
         //센서 초기화
@@ -273,10 +284,15 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
             //일정 거리 이상 가까이 오면 다음 체크포인트로
             if (currentDistance <= 4) {
                 gpsNodePointArrayList.removeAt(0)
+
+                //가이드 삭제 추가
+                guide.removeAt(0)
             }
             val tmp2 = locationModel.getDistance(targetLocation, lastLocation)
             if (tmp2 > lastDistance) {
                 gpsNodePointArrayList.removeAt(0)
+                //가이드 삭제 추가
+                guide.removeAt(0)
             }
             //남은 체크포인트 중 지나친 체크포인트 체크
             try {
@@ -292,6 +308,8 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
                         if (currentDistance > tmp) {
                             for (j in 0..i) {
                                 gpsNodePointArrayList.removeAt(j)
+                                //가이드 삭제 추가
+                                guide.removeAt(j)
                             }
                             break
                         }
@@ -353,7 +371,13 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         arFragment.arSceneView.scene.addChild(anchorNode)
 
         node.parent = transformableNode
-        node.renderable = modelRender.checkPointRender
+
+        //다음 방향에 따른 모델 구분
+        when (guide[0].type) {
+            "직진" -> node.renderable = modelRender.straightRender
+            "좌" -> node.renderable = modelRender.leftRender
+            "우" -> node.renderable = modelRender.rightRender
+        }
 
         node.localPosition = Vector3(0F,1F,((currentDistance / 30) * -1).toFloat())
 

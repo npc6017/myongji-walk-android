@@ -7,7 +7,9 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 
 class ModelRender {
-    lateinit var checkPointRender: ModelRenderable
+    lateinit var straightRender: ModelRenderable
+    lateinit var leftRender: ModelRenderable
+    lateinit var rightRender: ModelRenderable
     lateinit var arrowRender: ModelRenderable
 
     fun arrowModel() {
@@ -45,7 +47,7 @@ class ModelRender {
                     return@handle null
                 }
                 try {
-                    checkPointRender = render.get()
+                    straightRender = render.get()
                 } catch (e: InterruptedException) {
                     e.getStackTrace()
                 } catch (e: ExecutionException) {
@@ -67,7 +69,7 @@ class ModelRender {
                     return@handle null
                 }
                 try {
-                    arrowRender = render.get()
+                    leftRender = render.get()
                 } catch (e: InterruptedException) {
                     e.stackTrace
                 } catch (e: ExecutionException) {
@@ -89,7 +91,7 @@ class ModelRender {
                     return@handle null
                 }
                 try {
-                    arrowRender = render.get()
+                    rightRender = render.get()
                 } catch (e: InterruptedException) {
                     e.stackTrace
                 } catch (e: ExecutionException) {
