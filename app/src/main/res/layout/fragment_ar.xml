@@ -20,8 +20,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="80dp"
             android:orientation="vertical">
+            <!--
 
             <TextView
                 android:id="@+id/angle"
@@ -60,6 +61,17 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@android:color/holo_red_light"
+                android:textSize="20sp" />
+            -->
+
+            <TextView
+                android:id="@+id/target"
+                android:layout_gravity="center"
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:background="@drawable/round_button_blue"
+                android:textStyle="bold"
                 android:textSize="20sp" />
 
         </LinearLayout>

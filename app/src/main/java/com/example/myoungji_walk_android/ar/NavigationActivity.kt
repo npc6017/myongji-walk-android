@@ -252,9 +252,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
         //targetLocation 과 현재 위치의 각도 계산
         angle = locationModel.getAngle(mLocation, targetLocation).toFloat()
-
         angleNext = locationModel.getAngle(targetLocation, locationModel.coordToLocation(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])).toFloat()
-
         lastDistance = locationModel.getDistance(mLocation, lastLocation)
         /*
         binding.angle.text = "angle : " + angle
@@ -263,8 +261,8 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
         binding.now.text =
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
-
          */
+        binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
     }
 
     private fun nearCheckPoint() {
