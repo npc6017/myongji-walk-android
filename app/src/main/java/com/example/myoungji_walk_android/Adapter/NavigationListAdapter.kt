@@ -23,11 +23,11 @@ class NavigationListAdapter: ListAdapter<Guide, NavigationListAdapter.ItemViewHo
                     arrowTextView.text = "직진"
                     arrowImageView.setImageResource(R.drawable.baseline_straight_24)
                 }
-                "왼쪽" -> {
+                "좌회전" -> {
                     arrowTextView.text = "왼쪽 방향"
                     arrowImageView.setImageResource(R.drawable.baseline_turn_left_24)
                 }
-                "오른쪽" -> {
+                "우회전" -> {
                     arrowTextView.text = "오른쪽 방향"
                     arrowImageView.setImageResource(R.drawable.baseline_turn_right_24)
                 }
