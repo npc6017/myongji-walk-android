@@ -17,6 +17,6 @@
     </style>
 
     <style name="Style.Color.Button" parent="">
-        <item name="android:backgroundTint">@color/teal_200</item>
+        <item name="android:backgroundTint">@color/light_blue</item>
     </style>
 </resources>

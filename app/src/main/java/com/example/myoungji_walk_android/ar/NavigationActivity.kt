@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.example.myoungji_walk_android.Model.Guide
+import com.example.myoungji_walk_android.Model.pathFindDto
 import com.example.myoungji_walk_android.R
 import com.example.myoungji_walk_android.databinding.FragmentArBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -35,6 +37,7 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
@@ -85,17 +88,10 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
+    //위치값
+    var guide = ArrayList<Guide>()
 
-    /**hide this**/
-    private val gpsNodePoint = arrayOf(
-        doubleArrayOf(37.64450, 126.69155),
-        doubleArrayOf(37.64447, 126.69070),
-        doubleArrayOf(37.64442, 126.68899),
-        doubleArrayOf(37.64452, 126.68715),
-        doubleArrayOf(37.64485, 126.68586),
-        doubleArrayOf(37.64489, 126.68569)
-
-    )
+    private lateinit var route : pathFindDto
 
     //권한 체크
     private fun checkPermission() {
@@ -122,18 +118,40 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         override fun onProviderDisabled(provider: String) {}
     }
 
+    private fun initData(){
+        route = intent.getSerializableExtra("route") as pathFindDto
+
+        route.let {
+            guide = it.guide as ArrayList<Guide>
+        }
+
+        val tempCoord = Array(route.items.size) { DoubleArray(2) { 1.0 } }
+        for(i in route.items.indices) {
+            tempCoord[i][0] = route.items[i].latitude.toDouble()
+            tempCoord[i][1] = route.items[i].longitude.toDouble()
+        }
+        gpsNodePointArrayList.addAll(listOf(*tempCoord))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.fragment_ar)
 
+        try {
+            initData()
+        }catch (e: Exception) {
+            Toast.makeText(this, "경로생성중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+
         locationModel = LocationModel()
         modelRender = ModelRender()
 
-        modelRender.checkPointModel()
-        modelRender.arrowModel()
+        modelRender.straightModel()
+        modelRender.leftModel()
+        modelRender.rightModel()
 
-        //tast checkpoint. 추후 서버에서 받아올 수 있도록
-        gpsNodePointArrayList.addAll(listOf(*gpsNodePoint))
+        modelRender.arrowModel()
 
         //센서 초기화
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -162,7 +180,6 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         )
 
         //AR 화면 실행
-
         arFragment = supportFragmentManager.findFragmentById(R.id.arFragment) as ArFragment
         arSceneView = arFragment.arSceneView
 
@@ -246,16 +263,17 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
         //targetLocation 과 현재 위치의 각도 계산
         angle = locationModel.getAngle(mLocation, targetLocation).toFloat()
-
         angleNext = locationModel.getAngle(targetLocation, locationModel.coordToLocation(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])).toFloat()
-
         lastDistance = locationModel.getDistance(mLocation, lastLocation)
+        /*
         binding.angle.text = "angle : " + angle
         binding.nextAngle.text = "next_angle : " + angleNext
         binding.checkPoint.text = "체크포인트 : " + gpsNodePointArrayList.size + " 개"
         binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
         binding.now.text =
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
+         */
+        binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
     }
 
     private fun nearCheckPoint() {
@@ -266,10 +284,15 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
             //일정 거리 이상 가까이 오면 다음 체크포인트로
             if (currentDistance <= 4) {
                 gpsNodePointArrayList.removeAt(0)
+
+                //가이드 삭제 추가
+                guide.removeAt(0)
             }
             val tmp2 = locationModel.getDistance(targetLocation, lastLocation)
             if (tmp2 > lastDistance) {
                 gpsNodePointArrayList.removeAt(0)
+                //가이드 삭제 추가
+                guide.removeAt(0)
             }
             //남은 체크포인트 중 지나친 체크포인트 체크
             try {
@@ -285,6 +308,8 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
                         if (currentDistance > tmp) {
                             for (j in 0..i) {
                                 gpsNodePointArrayList.removeAt(j)
+                                //가이드 삭제 추가
+                                guide.removeAt(j)
                             }
                             break
                         }
@@ -346,7 +371,13 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         arFragment.arSceneView.scene.addChild(anchorNode)
 
         node.parent = transformableNode
-        node.renderable = modelRender.checkPointRender
+
+        //다음 방향에 따른 모델 구분
+        when (guide[0].type) {
+            "직진" -> node.renderable = modelRender.straightRender
+            "좌" -> node.renderable = modelRender.leftRender
+            "우" -> node.renderable = modelRender.rightRender
+        }
 
         node.localPosition = Vector3(0F,1F,((currentDistance / 30) * -1).toFloat())
 
@@ -397,7 +428,8 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
     }
 
     override fun onMapReady(naverMap: NaverMap) {
-        naverMap.isLiteModeEnabled = true
+        val coord = mutableListOf<LatLng>()
+        //naverMap.isLiteModeEnabled = true
         naverMap.locationSource = locationSource
         naverMap.uiSettings.isLocationButtonEnabled = true
         naverMap.locationTrackingMode = LocationTrackingMode.Face
@@ -407,13 +439,11 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
                 Toast.LENGTH_SHORT).show()
         }
 
-        /*
         val marker = Marker()
-        marker.position = LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1])
-        marker.position = LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])
+        route.items.forEach {
+            marker.position = LatLng(it.latitude.toDouble(), it.longitude.toDouble())
+        }
         marker.map = naverMap
-
-         */
 
         val path = PathOverlay()
         path.width = 30
@@ -422,19 +452,15 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         path.outlineWidth = 5
         path.color = Color.parseColor("#00AAFF")
 
-        path.coords = listOf(
-            LatLng(gpsNodePointArrayList[0][0], gpsNodePointArrayList[0][1]),
-            LatLng(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1]),
-            LatLng(gpsNodePointArrayList[2][0], gpsNodePointArrayList[2][1]),
-            LatLng(gpsNodePointArrayList[3][0], gpsNodePointArrayList[3][1])
-        )
+        route.items.forEach {
+            coord.add(LatLng(it.latitude.toDouble(), it.longitude.toDouble()))
+        }
+
+        path.coords = coord
+
         path.map = naverMap
-
-
-
     }
 }
-
 
 
 
