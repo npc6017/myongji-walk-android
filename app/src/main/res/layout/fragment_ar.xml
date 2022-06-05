@@ -71,7 +71,7 @@
                 android:layout_height="50dp"
                 android:gravity="center"
                 android:background="@drawable/round_button_blue"
-                android:textStyle="bold"
+                android:textColor="#FFFFFFFF"
                 android:textSize="20sp" />
 
         </LinearLayout>

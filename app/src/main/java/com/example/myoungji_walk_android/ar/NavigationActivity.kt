@@ -88,9 +88,9 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
-    //위치값
+    //가이드정보
     var guide = ArrayList<Guide>()
-
+    //pathFindDto
     private lateinit var route : pathFindDto
 
     //권한 체크
@@ -137,12 +137,15 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.fragment_ar)
 
+
         try {
             initData()
         }catch (e: Exception) {
             Toast.makeText(this, "경로생성중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             finish()
         }
+
+        initData()
 
         locationModel = LocationModel()
         modelRender = ModelRender()
@@ -273,7 +276,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         binding.now.text =
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
          */
-        binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0) + " m"
+        binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0).toInt() + " m"
     }
 
     private fun nearCheckPoint() {
@@ -323,7 +326,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
                 finish()
             }
         }else{
-                //Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
         }
     }
 

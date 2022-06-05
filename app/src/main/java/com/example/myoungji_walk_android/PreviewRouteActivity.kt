@@ -67,8 +67,8 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     val intent = Intent(this@PreviewRouteActivity, NavigationActivity::class.java)
                     with(intent) {
                         //todo 경로전달
-                        startActivity(intent)
                         intent.putExtra("route", route)
+                        startActivity(intent)
                         overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }
@@ -76,8 +76,8 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     val intent = Intent(this@PreviewRouteActivity, NavigationActivity::class.java)
                     with(intent) {
                         //todo 경로전달
-                        startActivity(intent)
                         intent.putExtra("route", route)
+                        startActivity(intent)
                         overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                     }
                 }
