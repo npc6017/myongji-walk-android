@@ -2,13 +2,13 @@ package com.example.myoungji_walk_android
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.example.myoungji_walk_android.Adapter.BookMarkAdapter
-import com.example.myoungji_walk_android.Adapter.HistoryAdapter
-import com.example.myoungji_walk_android.Adapter.NavigationListAdapter
 import com.example.myoungji_walk_android.databinding.ActivityMainroutesearchBinding
 
 class MainRouteSearchActivity : AppCompatActivity() {
@@ -16,8 +16,7 @@ class MainRouteSearchActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainroutesearchBinding
     private var divisionLocal : Int? = 0
     private lateinit var db: AppDataBaseBookMark
-    private val bookMarkAdapter = BookMarkAdapter()
-
+    private lateinit var bookMarkAdapter : BookMarkAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainroutesearchBinding.inflate(layoutInflater)
@@ -48,11 +47,19 @@ class MainRouteSearchActivity : AppCompatActivity() {
                     startActivity(Intent(this@MainRouteSearchActivity, SearchPlaceActivity::class.java))
                 }
                 binding.changeButton.id -> {
+                    //출발지와 목적지 전환
                     val temp : String = startTitle
+                    var temp2 : Int = startId
                     startTitle = destinationTitle
                     destinationTitle = temp
-                    binding.destinationInputButton.text = startTitle
-                    binding.startInputButton.text = destinationTitle
+                    binding.destinationInputButton.text = destinationTitle
+                    binding.startInputButton.text = startTitle
+                    Log.d("MainRouteSearchActivity::start", startTitle)
+                    Log.d("MainRouteSearchActivity::end", destinationTitle)
+                    startId = endId
+                    endId = temp2
+                    Log.d("MainRouteSearchActivity::startId", startId.toString())
+                    Log.d("MainRouteSearchActivity::endId", endId.toString())
                 }
             }
 
@@ -69,6 +76,11 @@ class MainRouteSearchActivity : AppCompatActivity() {
     }
 
     private fun initBookMarkRecyclerView(){
+        bookMarkAdapter = BookMarkAdapter {
+            endId = it.uid
+            binding.destinationInputButton.text = it.keyword
+            Log.d("MainRouteSearchActivity", endId.toString())
+        }
         binding.bookMarkRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookMarkRecyclerView.adapter = bookMarkAdapter
     }

@@ -80,7 +80,7 @@ class JoinActivity : AppCompatActivity() {
                     when(response.code()){
                         200 -> {
                             Toast.makeText(this@JoinActivity, "인증번호가 발송되었습니다.", Toast.LENGTH_SHORT).show()
-                            //binding.buttonCheckCertification.isEnabled = true
+                            binding.buttonCheckCertification.isEnabled = true
                         }
                         else -> {
                             Toast.makeText(this@JoinActivity, "이메일을 확인해주세요.", Toast.LENGTH_SHORT).show()
@@ -113,7 +113,7 @@ class JoinActivity : AppCompatActivity() {
                     when(response.code()){
                         200 -> {
                             Toast.makeText(this@JoinActivity, "인증되었습니다.", Toast.LENGTH_SHORT).show()
-                            //binding.buttonRegister.isEnabled = true
+                            binding.buttonRegister.isEnabled = true
                         }
                         else -> {
                             Toast.makeText(this@JoinActivity, "인증번호를 다시 확인해주세요.", Toast.LENGTH_SHORT).show()

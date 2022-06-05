@@ -28,6 +28,15 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
         initButton()
         PrefsHelper.init(applicationContext)
+        autoLogin()
+    }
+
+    private fun autoLogin(){
+        val autoLoginCheck = PrefsHelper.read("autoLogin", false)
+        val getToken = PrefsHelper.read("accessToken", "")
+        if(autoLoginCheck && getToken.isNotEmpty()){
+            startActivity(Intent(this, MainActivity::class.java))
+        }
     }
 
     private fun getTokenAPI(email: String, password: String) {
@@ -51,6 +60,9 @@ class LoginActivity : AppCompatActivity() {
                     when(response.code()){
                         200 -> {
                             val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            if(binding.AutoLoginCheckBox.isChecked){
+                                PrefsHelper.write("autoLogin", binding.AutoLoginCheckBox.isChecked)
+                            }
                             with(intent) {
                                 startActivity(this)
                                 overridePendingTransition(

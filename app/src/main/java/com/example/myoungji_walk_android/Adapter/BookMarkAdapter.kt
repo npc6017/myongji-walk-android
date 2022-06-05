@@ -10,20 +10,27 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.myoungji_walk_android.Model.BookMark
 import com.example.myoungji_walk_android.databinding.ItemBookmarkBinding
 
-class BookMarkAdapter(): ListAdapter<BookMark, BookMarkAdapter.ItemViewHolder>(diffUtil) {
+class BookMarkAdapter(private val onClick: (BookMark) -> Unit): ListAdapter<BookMark, BookMarkAdapter.ItemViewHolder>(diffUtil) {
 
-    inner class ItemViewHolder(private val binding: ItemBookmarkBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(bookMark: BookMark){
+    inner class ItemViewHolder(private val binding: ItemBookmarkBinding, private val onClick: (BookMark) -> Unit): RecyclerView.ViewHolder(binding.root) {
+        fun bind(bookMark: BookMark) {
             binding.bookMarkTextView.text = bookMark.keyword
+        }
+        fun setOnClickListener(bookMark: BookMark) {
+            binding.bookMarkTextView.setOnClickListener {
+                onClick(bookMark)
+            }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        return ItemViewHolder(ItemBookmarkBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        val binding = ItemBookmarkBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ItemViewHolder(binding, onClick)
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         holder.bind(currentList[position])
+        holder.setOnClickListener(getItem(position))
     }
 
     companion object {

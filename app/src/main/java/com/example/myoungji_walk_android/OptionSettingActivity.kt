@@ -53,13 +53,14 @@ class OptionSettingActivity : AppCompatActivity() {
     private fun initVariable(){
         start = intent.getIntExtra("start", 0)
         end = intent.getIntExtra("end", 0)
-        Log.d("OptionSettingActivitiy::start", start.toString())
-        Log.d("OptionSettingActivitiy::end", end.toString())
+        Log.d("OptionSettingActivity::start", start.toString())
+        Log.d("OptionSettingActivity::end", end.toString())
     }
 
 
     private fun getListFromAPI(weightCode : String) {
         val accessToken = PrefsHelper.read("accessToken", "")
+        //testId start 1065, end 1049, weightCode = STREET_LAMP
         retrofitService.priviewRoute("Bearer $accessToken", start, end, weightCode)
             .enqueue(object : Callback<pathFindDto> {
                 override fun onResponse(

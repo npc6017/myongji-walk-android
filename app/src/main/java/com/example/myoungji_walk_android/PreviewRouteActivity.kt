@@ -1,5 +1,6 @@
 package com.example.myoungji_walk_android
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -48,6 +49,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     inner class buttonListener : View.OnClickListener {
+        @SuppressLint("SetTextI18n")
         override fun onClick(v: View?) {
             when(v?.id){
                 binding.cardViewLayout.detailButton.id -> {
@@ -58,6 +60,7 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                         "LOW_STAIR" -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "계단 없는"
                         "STREET_LAMP" -> binding.bottomSheetLayout.bottomSheetTitleTextView.text = "안전한"
                     }
+                    binding.bottomSheetLayout.bottomSheetDistanceTextView.text = "${route.sumDistance}M"
                     binding.cardViewLayout.root.visibility = View.GONE
                 }
                 binding.cardViewLayout.guideButton.id -> {
@@ -80,10 +83,12 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initData(){
         route.let {
             recyclerViewAdapter.submitList(it.guide)
         }
+        binding.cardViewLayout.distanceTextView.text = "${route.sumDistance}M"
     }
     private fun initButton(){
         binding.cardViewLayout.detailButton.setOnClickListener(buttonListener())
@@ -114,9 +119,6 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun getRoute(){
-        //polyline.map = naverMap
-        //polyline.coords = coord
-
         path.width = 30
         path.patternImage = OverlayImage.fromResource(R.drawable.arrow_path)
         path.patternInterval = 60
