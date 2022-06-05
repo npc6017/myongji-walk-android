@@ -2,6 +2,7 @@ package com.example.myoungji_walk_android
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,11 +49,19 @@ class MainRouteSearchActivity : AppCompatActivity() {
                     startActivity(Intent(this@MainRouteSearchActivity, SearchPlaceActivity::class.java))
                 }
                 binding.changeButton.id -> {
+                    //출발지와 목적지 전환
                     val temp : String = startTitle
+                    var temp2 : Int = startId
                     startTitle = destinationTitle
                     destinationTitle = temp
-                    binding.destinationInputButton.text = startTitle
-                    binding.startInputButton.text = destinationTitle
+                    binding.destinationInputButton.text = destinationTitle
+                    binding.startInputButton.text = startTitle
+                    Log.d("MainRouteSearchActivity::start", startTitle)
+                    Log.d("MainRouteSearchActivity::end", destinationTitle)
+                    startId = endId
+                    endId = temp2
+                    Log.d("MainRouteSearchActivity::startId", startId.toString())
+                    Log.d("MainRouteSearchActivity::endId", endId.toString())
                 }
             }
 

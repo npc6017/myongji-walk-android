@@ -32,7 +32,7 @@ class SearchPlaceActivity : AppCompatActivity() {
             applicationContext,
             AppDataBase::class.java,
             "LatelySearchDB"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
 
         initBackButton()
         initSearchButton()
@@ -63,13 +63,13 @@ class SearchPlaceActivity : AppCompatActivity() {
                         response.body()?.let {
                             Log.d("ok", "oK")
                             val data = nodeDto(it.id, it.latitude, it.longitude, it.name)
-                            //saveSearchKeyword(placeText)
+                            saveSearchKeyword(placeText)
                             Log.d("SearchPlaceActivity::responseCode", response.code().toString())
                             val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
                             with(intent) {
                                 putExtra("data", data)
                                 startActivity(this)
-                                //overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                                overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
                             }
                         }
                     }
@@ -82,7 +82,7 @@ class SearchPlaceActivity : AppCompatActivity() {
 
     private fun saveSearchKeyword(keyword: String){
         Thread {
-            db.historyDao().insertHistory(History(null, keyword))
+            db.historyDao().insertHistory(History(keyword))
         }.start()
     }
 

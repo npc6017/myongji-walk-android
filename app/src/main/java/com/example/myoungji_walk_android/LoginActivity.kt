@@ -33,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun autoLogin(){
         val autoLoginCheck = PrefsHelper.read("autoLogin", false)
-        val getToken = PrefsHelper.read("accessToken", null)
+        val getToken = PrefsHelper.read("accessToken", "")
         if(autoLoginCheck && getToken.isNotEmpty()){
             startActivity(Intent(this, MainActivity::class.java))
         }
