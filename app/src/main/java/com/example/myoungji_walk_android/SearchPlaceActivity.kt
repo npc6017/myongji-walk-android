@@ -49,35 +49,39 @@ class SearchPlaceActivity : AppCompatActivity() {
 
     private fun initSearchButton(){
         binding.searchButton.setOnClickListener {
-            val accessToken = PrefsHelper.read("accessToken", "")
             val placeText = binding.placeEditTextView.text.toString()
-            retrofitService1.searchLocation("Bearer $accessToken", placeText)
-                .enqueue(object: Callback<nodeDto> {
-                    override fun onResponse(call: Call<nodeDto>, response: Response<nodeDto>) {
-                        if(response.isSuccessful.not()) {
-                            Log.d("not ok", "not oK")
-                            Log.d("SearchPlaceActivity::respneseCode", response.code().toString())
-                            Log.e("SearchPlaceActivity::response", response.message())
-                            return
-                        }
-                        response.body()?.let {
-                            Log.d("ok", "oK")
-                            val data = nodeDto(it.id, it.latitude, it.longitude, it.name)
-                            saveSearchKeyword(placeText)
-                            Log.d("SearchPlaceActivity::responseCode", response.code().toString())
-                            val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
-                            with(intent) {
-                                putExtra("data", data)
-                                startActivity(this)
-                                overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
-                            }
-                        }
-                    }
-                    override fun onFailure(call: Call<nodeDto>, t: Throwable) {
-                        TODO("Not yet implemented")
-                    }
-                })
+            communitcationRetroift(placeText)
         }
+    }
+
+    private fun communitcationRetroift(placeText: String){
+        val accessToken = PrefsHelper.read("accessToken", "")
+        retrofitService1.searchLocation("Bearer $accessToken", placeText)
+            .enqueue(object: Callback<nodeDto> {
+                override fun onResponse(call: Call<nodeDto>, response: Response<nodeDto>) {
+                    if(response.isSuccessful.not()) {
+                        Log.d("not ok", "not oK")
+                        Log.d("SearchPlaceActivity::respneseCode", response.code().toString())
+                        Log.e("SearchPlaceActivity::response", response.message())
+                        return
+                    }
+                    response.body()?.let {
+                        Log.d("ok", "oK")
+                        val data = nodeDto(it.id, it.latitude, it.longitude, it.name)
+                        saveSearchKeyword(placeText)
+                        Log.d("SearchPlaceActivity::responseCode", response.code().toString())
+                        val intent = Intent(this@SearchPlaceActivity, ConfirmPlaceActivity ::class.java)
+                        with(intent) {
+                            putExtra("data", data)
+                            startActivity(this)
+                            overridePendingTransition(androidx.appcompat.R.anim.abc_fade_in, androidx.appcompat.R.anim.abc_fade_out)
+                        }
+                    }
+                }
+                override fun onFailure(call: Call<nodeDto>, t: Throwable) {
+                    TODO("Not yet implemented")
+                }
+            })
     }
 
     private fun saveSearchKeyword(keyword: String){
@@ -103,7 +107,9 @@ class SearchPlaceActivity : AppCompatActivity() {
     }
 
     private fun initHistoryRecyclerView(){
-        historyAdapter = HistoryAdapter(historyDeleteClickedListener = {
+        historyAdapter = HistoryAdapter(itemClickedListener = {
+            communitcationRetroift(it)
+        }, historyDeleteClickedListener = {
             deleteSearchKeyword(it)
         })
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
