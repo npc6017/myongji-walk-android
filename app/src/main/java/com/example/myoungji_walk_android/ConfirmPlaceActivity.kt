@@ -70,7 +70,7 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
                 }
                 binding.cardViewLayout.bookMarkCheckBox.id -> {
                     if(binding.cardViewLayout.bookMarkCheckBox.isChecked){
-                        saveBookMark(binding.cardViewLayout.title.text.toString())
+                        saveBookMark(id, binding.cardViewLayout.title.text.toString())
                     }
                     else {
                         deleteBookMark(binding.cardViewLayout.title.text.toString())
@@ -88,9 +88,9 @@ class ConfirmPlaceActivity : AppCompatActivity(), OnMapReadyCallback{
         }.start()
     }
 
-    private fun saveBookMark(keyword: String){
+    private fun saveBookMark(id : Int, keyword: String){
         Thread {
-            db.bookMarkDao().insertHistory(BookMark(null, keyword))
+            db.bookMarkDao().insertHistory(BookMark(id, keyword))
         }.start()
     }
 

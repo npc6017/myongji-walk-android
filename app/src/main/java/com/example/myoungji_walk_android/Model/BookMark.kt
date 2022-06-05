@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class BookMark(
-    @PrimaryKey val uid : Int?,
+    @PrimaryKey val uid : Int,
     @ColumnInfo(name = "keyword") val keyword : String?
 )

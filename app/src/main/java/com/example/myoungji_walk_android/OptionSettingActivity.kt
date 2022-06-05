@@ -53,8 +53,8 @@ class OptionSettingActivity : AppCompatActivity() {
     private fun initVariable(){
         start = intent.getIntExtra("start", 0)
         end = intent.getIntExtra("end", 0)
-        Log.d("OptionSettingActivitiy::start", start.toString())
-        Log.d("OptionSettingActivitiy::end", end.toString())
+        Log.d("OptionSettingActivity::start", start.toString())
+        Log.d("OptionSettingActivity::end", end.toString())
     }
 
 
