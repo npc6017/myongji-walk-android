@@ -29,10 +29,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         initInputPlaceButton()
         initFindPlaceButton()
         //ar 테스트용 진입버튼
-        binding.gotoAr.setOnClickListener {
-            val intent = Intent(requireContext(), NavigationActivity::class.java)
-            startActivity(intent)
-        }
+//        binding.gotoAr.setOnClickListener {
+//            val intent = Intent(requireContext(), NavigationActivity::class.java)
+//            startActivity(intent)
+//        }
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
         return binding.root

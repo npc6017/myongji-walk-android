@@ -91,6 +91,12 @@ class PreviewRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             recyclerViewAdapter.submitList(it.guide)
         }
         binding.cardViewLayout.distanceTextView.text = "${route.sumDistance}M"
+        when(option){
+            "LOW_HILL" -> binding.cardViewLayout.title.text = "완만한 길로 안내"
+            "LOW_RAIN" -> binding.cardViewLayout.title.text = "비를 피할 수 있는 길로 안내"
+            "LOW_STAIR" -> binding.cardViewLayout.title.text = "계단 없는 길로 안내"
+            "STREET_LAMP" -> binding.cardViewLayout.title.text = "안전한 길로 안내"
+        }
     }
 
     private fun initButton(){

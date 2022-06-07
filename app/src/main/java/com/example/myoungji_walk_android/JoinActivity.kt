@@ -82,6 +82,9 @@ class JoinActivity : AppCompatActivity() {
                             Toast.makeText(this@JoinActivity, "인증번호가 발송되었습니다.", Toast.LENGTH_SHORT).show()
                             binding.buttonCheckCertification.isEnabled = true
                         }
+                        500 -> {
+                            Toast.makeText(this@JoinActivity, "이미 가입된 정보입니다.", Toast.LENGTH_SHORT).show()
+                        }
                         else -> {
                             Toast.makeText(this@JoinActivity, "이메일을 확인해주세요.", Toast.LENGTH_SHORT).show()
                         }

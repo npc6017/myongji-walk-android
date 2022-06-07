@@ -26,6 +26,11 @@
         <entry key="..\:/Users/jun/AndroidStudioProjects/Myoungji_Walk_Android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.196" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/button_check_able.xml" value="0.148" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/button_disable.xml" value="0.148" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_arrow_back_ios_new_24.xml" value="0.148" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_clear_24.xml" value="0.148" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_map_24.xml" value="0.148" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.148" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.148" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button.xml" value="0.148" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_black.xml" value="0.148" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/drawable/round_button_blue.xml" value="0.148" />
@@ -34,6 +39,7 @@
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_login.xml" value="0.13802083333333334" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_mainroutesearch.xml" value="0.13802083333333334" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/activity_option_setting.xml" value="0.13802083333333334" />
+        <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/fragment_map.xml" value="0.13802083333333334" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/fragment_setting.xml" value="0.12001811594202899" />
         <entry key="..\:/Users/shiha/AndroidStudioProjects/myoungji-walk-android/app/src/main/res/layout/item_guide_cardview.xml" value="0.13802083333333334" />
       </map>
