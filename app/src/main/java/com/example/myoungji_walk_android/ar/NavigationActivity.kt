@@ -88,10 +88,15 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
     //위도 경도 형식으로 받아오는 배열값
     var gpsNodePointArrayList = ArrayList<DoubleArray>()
+
     //가이드정보
     var guide = ArrayList<Guide>()
+
+    //가이드정보
+    var direction = ArrayList<String>()
+
     //pathFindDto
-    private lateinit var route : pathFindDto
+    private lateinit var route: pathFindDto
 
     //권한 체크
     private fun checkPermission() {
@@ -114,11 +119,12 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
             mLocation = location
 
         }
+
         override fun onProviderEnabled(provider: String) {}
         override fun onProviderDisabled(provider: String) {}
     }
 
-    private fun initData(){
+    private fun initData() {
         route = intent.getSerializableExtra("route") as pathFindDto
 
         route.let {
@@ -126,9 +132,14 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         }
 
         val tempCoord = Array(route.items.size) { DoubleArray(2) { 1.0 } }
-        for(i in route.items.indices) {
+        for (i in route.items.indices) {
+            direction.add("직진")
             tempCoord[i][0] = route.items[i].latitude.toDouble()
             tempCoord[i][1] = route.items[i].longitude.toDouble()
+        }
+
+        for (i in guide.indices) {
+            direction[guide[i].pointIndex - 1] = guide[i].type
         }
         gpsNodePointArrayList.addAll(listOf(*tempCoord))
     }
@@ -140,7 +151,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
         try {
             initData()
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Toast.makeText(this, "경로생성중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             finish()
         }
@@ -166,7 +177,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         ) {
             mLocation = locationManager
                 .getLastKnownLocation(LocationManager.GPS_PROVIDER)!!
-        }else{
+        } else {
             mLocation = Location("myLoc")
         }
 
@@ -209,10 +220,10 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
 
         binding.button.setOnClickListener(View.OnClickListener {
-            if(bottomSheetBehavior.state==BottomSheetBehavior.STATE_COLLAPSED){
+            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 binding.button.setBackgroundResource(R.drawable.bar_down)
-            }else{
+            } else {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 binding.button.setBackgroundResource(R.drawable.bar_up)
             }
@@ -266,7 +277,10 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
 
         //targetLocation 과 현재 위치의 각도 계산
         angle = locationModel.getAngle(mLocation, targetLocation).toFloat()
-        angleNext = locationModel.getAngle(targetLocation, locationModel.coordToLocation(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])).toFloat()
+        angleNext = locationModel.getAngle(
+            targetLocation,
+            locationModel.coordToLocation(gpsNodePointArrayList[1][0], gpsNodePointArrayList[1][1])
+        ).toFloat()
         lastDistance = locationModel.getDistance(mLocation, lastLocation)
         /*
         binding.angle.text = "angle : " + angle
@@ -276,14 +290,17 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         binding.now.text =
             "현재좌표 : " + (mLocation.latitude.toString() + "," + mLocation.longitude.toString())
          */
-        binding.target.text = "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0).toInt() + " m"
+        binding.target.text =
+            "남은 거리 : " + (Math.round(currentDistance * 100) / 100.0).toInt() + " m"
     }
 
     private fun nearCheckPoint() {
         //gps 위치가 최신 정보인지 확인
-        if(TimeUnit.NANOSECONDS.toSeconds(
+        if (TimeUnit.NANOSECONDS.toSeconds(
                 SystemClock.elapsedRealtimeNanos()
-                    - mLocation.elapsedRealtimeNanos)<100) {
+                        - mLocation.elapsedRealtimeNanos
+            ) < 100
+        ) {
             //일정 거리 이상 가까이 오면 다음 체크포인트로
             if (currentDistance <= 4) {
                 gpsNodePointArrayList.removeAt(0)
@@ -325,8 +342,8 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
                 Toast.makeText(this, e.message!!, Toast.LENGTH_SHORT).show()
                 finish()
             }
-        }else{
-                Toast.makeText(this,"gps 수신중입니다." ,Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "gps 수신중입니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -378,11 +395,12 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         //다음 방향에 따른 모델 구분
         when (guide[0].type) {
             "직진" -> node.renderable = modelRender.straightRender
-            "좌" -> node.renderable = modelRender.leftRender
-            "우" -> node.renderable = modelRender.rightRender
+            "좌회전" -> node.renderable = modelRender.leftRender
+            "우회전" -> node.renderable = modelRender.rightRender
         }
 
-        node.localPosition = Vector3(0F,1F,((currentDistance / 30) * -1).toFloat())
+        //node.localPosition = Vector3(0F, 1F, ((currentDistance / 30) * -1).toFloat())
+        node.localPosition = Vector3(0F, 1F, 1F)
 
     }
 
@@ -415,7 +433,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         session.close()
     }
 
-    init{
+    init {
         instance = this
     }
 
@@ -438,8 +456,6 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         naverMap.locationTrackingMode = LocationTrackingMode.Face
 
         naverMap.addOnLocationChangeListener { location ->
-            Toast.makeText(this, "${location.latitude}, ${location.longitude}",
-                Toast.LENGTH_SHORT).show()
         }
 
         val marker = Marker()

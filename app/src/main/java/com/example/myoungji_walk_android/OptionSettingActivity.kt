@@ -61,8 +61,8 @@ class OptionSettingActivity : AppCompatActivity() {
     private fun getListFromAPI(weightCode : String) {
         val accessToken = PrefsHelper.read("accessToken", "")
         //testId start 1065, end 1049, weightCode = STREET_LAMP
-        start = 1065
-        end = 1049
+        start = 1463
+        end = 1549
         retrofitService.priviewRoute("Bearer $accessToken", start, end, weightCode)
             .enqueue(object : Callback<pathFindDto> {
                 override fun onResponse(
