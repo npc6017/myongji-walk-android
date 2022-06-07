@@ -15,8 +15,21 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/pointIndexTextView"
+        android:layout_width="wrap_content"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:layout_height="wrap_content"
+        tools:text="1번 체크포인트에서 "
+        app:layout_constraintTop_toTopOf="@id/arrowImageView"
+        app:layout_constraintStart_toEndOf="@id/arrowImageView"
+        android:textColor="@color/light_blue"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/arrowTextView"/>
+
+    <TextView
         android:id="@+id/arrowTextView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:gravity="center"
@@ -26,7 +39,7 @@
         app:layout_constraintTop_toTopOf="@id/arrowImageView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/arrowImageView"
+        app:layout_constraintStart_toEndOf="@id/pointIndexTextView"
         tools:text="직진" />
 
     <TextView
@@ -37,8 +50,7 @@
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/arrowTextView"
+        app:layout_constraintEnd_toEndOf="@id/arrowTextView"
         app:layout_constraintTop_toBottomOf="@id/arrowTextView"
         tools:text="200M" />
 

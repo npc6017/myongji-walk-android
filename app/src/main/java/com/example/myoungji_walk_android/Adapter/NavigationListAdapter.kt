@@ -18,21 +18,23 @@ class NavigationListAdapter: ListAdapter<Guide, NavigationListAdapter.ItemViewHo
             val arrowTextView = view.findViewById<TextView>(R.id.arrowTextView)
             val distanceItemTextView = view.findViewById<TextView>(R.id.distanceItemTextView)
             val arrowImageView = view.findViewById<ImageView>(R.id.arrowImageView)
+            val pointIndexTextView = view.findViewById<TextView>(R.id.pointIndexTextView)
             when(guide.type){
                 "직진" -> {
                     arrowTextView.text = "직진"
                     arrowImageView.setImageResource(R.drawable.baseline_straight_24)
                 }
                 "좌회전" -> {
-                    arrowTextView.text = "왼쪽 방향"
+                    arrowTextView.text = "좌측 방향"
                     arrowImageView.setImageResource(R.drawable.baseline_turn_left_24)
                 }
                 "우회전" -> {
-                    arrowTextView.text = "오른쪽 방향"
+                    arrowTextView.text = "우측 방향"
                     arrowImageView.setImageResource(R.drawable.baseline_turn_right_24)
                 }
             }
             distanceItemTextView.text = guide.distance
+            pointIndexTextView.text = "${guide.pointIndex}번 포인트에서 "
         }
     }
 
