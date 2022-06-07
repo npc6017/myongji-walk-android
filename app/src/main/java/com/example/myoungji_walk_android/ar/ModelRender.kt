@@ -11,6 +11,7 @@ class ModelRender {
     lateinit var leftRender: ModelRenderable
     lateinit var rightRender: ModelRenderable
     lateinit var arrowRender: ModelRenderable
+    lateinit var finishRender: ModelRenderable
 
     fun arrowModel() {
         val render = ModelRenderable.builder()
@@ -92,6 +93,28 @@ class ModelRender {
                 }
                 try {
                     rightRender = render.get()
+                } catch (e: InterruptedException) {
+                    e.stackTrace
+                } catch (e: ExecutionException) {
+                    e.stackTrace
+                }
+                null
+            }
+    }
+
+    fun finishModel() {
+        val render = ModelRenderable.builder()
+            .setSource(getInstance(), Uri.parse("right.glb"))
+            .setIsFilamentGltf(true)
+            .setAsyncLoadEnabled(true)
+            .build()
+        CompletableFuture.allOf(render)
+            .handle<Any?> { notUsed: Void?, throwable: Throwable? ->
+                if (throwable != null) {
+                    return@handle null
+                }
+                try {
+                    finishRender = render.get()
                 } catch (e: InterruptedException) {
                     e.stackTrace
                 } catch (e: ExecutionException) {

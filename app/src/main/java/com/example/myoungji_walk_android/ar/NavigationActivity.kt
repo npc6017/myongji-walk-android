@@ -141,6 +141,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         for (i in guide.indices) {
             direction[guide[i].pointIndex - 1] = guide[i].type
         }
+        direction[direction.size-1]="끝"
         gpsNodePointArrayList.addAll(listOf(*tempCoord))
     }
 
@@ -164,6 +165,7 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         modelRender.straightModel()
         modelRender.leftModel()
         modelRender.rightModel()
+        modelRender.finishModel()
 
         modelRender.arrowModel()
 
@@ -397,10 +399,11 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
             "직진" -> node.renderable = modelRender.straightRender
             "좌회전" -> node.renderable = modelRender.leftRender
             "우회전" -> node.renderable = modelRender.rightRender
+            "끝" -> node.renderable = modelRender.finishRender
         }
 
-        //node.localPosition = Vector3(0F, 1F, ((currentDistance / 30) * -1).toFloat())
-        node.localPosition = Vector3(0F, 1F, 1F)
+        node.localPosition = Vector3(0F, 1F, ((currentDistance / 30) * -1).toFloat())
+        //node.localPosition = Vector3(0F, 1F, 1F)
 
     }
 
@@ -455,8 +458,11 @@ class NavigationActivity : AppCompatActivity(), SensorEventListener, OnMapReadyC
         naverMap.uiSettings.isLocationButtonEnabled = true
         naverMap.locationTrackingMode = LocationTrackingMode.Face
 
+        /*
         naverMap.addOnLocationChangeListener { location ->
         }
+
+         */
 
         val marker = Marker()
         route.items.forEach {
