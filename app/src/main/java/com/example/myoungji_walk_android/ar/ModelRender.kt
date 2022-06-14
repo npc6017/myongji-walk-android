@@ -104,7 +104,7 @@ class ModelRender {
 
     fun finishModel() {
         val render = ModelRenderable.builder()
-            .setSource(getInstance(), Uri.parse("right.glb"))
+            .setSource(getInstance(), Uri.parse("finish.glb"))
             .setIsFilamentGltf(true)
             .setAsyncLoadEnabled(true)
             .build()
